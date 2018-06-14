@@ -9,10 +9,11 @@
 #include <EncryptedArray.h>
 #include <iomanip>
 #include "powerful.h"
+#include "encoding.h"
 
-#include<string>
-#include<sstream>
-
+#include <string>
+#include <sstream>
+#include <math.h>
 
 using namespace std;
 using namespace NTL;
@@ -20,16 +21,13 @@ using namespace chrono;
 
 typedef high_resolution_clock Clock;
 
-//ZZX msg;
-//void encode(int x);
-
 int main() {
     cout << "Hello, World!" << endl;
 
     cout << "-------------------- Initialization --------------------" << endl;
     auto begin_init = Clock::now();
 
-    long m = 8;                                         // Specific modulus
+    long m = 1119;                                         // Specific modulus
     long p = 17;                                        // Plaintext base
     long r = 1;                                         // Lifting
     long L = 5;                                         // Number of levels in the modulus chain
@@ -70,11 +68,13 @@ int main() {
 
 
 
-
+    // Encrypt for all ZZX in mat
+    // vector<vector<ZZX>> ---> vector< vector<Ctxt>>
+    // Call matrixproduct(vector< vector<Ctxt>>, vector< vector<Ctxt>>)
 
 
     cout << endl;
-    int x, y;
+    int x, y, u, v;
 
     ifstream myfile;
     myfile.open("/home/karis/CLionProjects/HElib-basic/matrix.txt");
@@ -84,78 +84,208 @@ int main() {
         cout << "File failed to open!" << endl;
     }
 
-    int A[x][y];
+    myfile >> x;
+    //cout << x << endl; // no. of rows
+    myfile >> y;
+    //cout << y << endl; // no. of cols
 
-//    myfile >> a >> b;
-//    cout << a << endl;
-//    cout << b << endl;
+    int row1 = 0;
+    vector<vector<int>> mat1; // 2d array as a vector of vectors
+    vector<int> rowVector1(y);
 
-//    string line;
-
-//    getline(myfile, x);
-//    getline(myfile, y);
-
-    while (getline(myfile, line)) {
-        cout << line << endl;
-    }
-
-
-
-
-
-
-//    for (int i = 0; i < x; i++) {
-//        myfile >> A[i][j];
-//    }
-//    cout << A << endl;
-
-/*    cout << endl;
-    // Initialize digits to be 0 and let dividend = x.
-    int x = 14, remainder, digits = 0, dividend = x;
-
-    // Stops when the dividend becomes 0.
-    while (dividend != 0) {
-        dividend = dividend / 2;
-        digits++;
-    }
-
-    int arr[digits];
-
-    // Initialize dividend to be x again so that it doesnt use the updated dividend values.
-    dividend = x;
-
-    // Array placement starts from 0. First placement is the constant's binary.
-    for (int i = 0; i < digits; i++) {
-        remainder = dividend % 2;
-        arr[i] = remainder;
-        dividend = dividend / 2;
-    }
-
-    ZZX msg;
-    // Prints out the array of binary numbers.
-    for (int i = 0; i < digits; i++) {
-        if (arr[i] == 1) {
-            SetCoeff(msg, i);
+    cout << "This is the first matrix: " << endl;
+    while (myfile.good()) { // ... and while there are no errors,
+        mat1.push_back(rowVector1); // add a new row,
+        for (int col = 0; col < y; col++) {
+            myfile >> mat1[row1][col]; // fill the row with col elements
+        }
+        row1++;
+        if (row1 >= x) {
+            break;
         }
     }
+    cout << mat1 << '\n' << endl;
+
+    myfile >> u;
+    //cout << u << endl; // no. of rows
+    myfile >> v;
+    //cout << v << endl; // no. of cols
+
+    assert (y == u);
+
+    int row2 = 0;
+    vector<vector<int> > mat2;
+    vector<int> rowVector2(v);
+
+    cout << "This is the second matrix: " << endl;
+    while (myfile.good()) {
+        mat2.push_back(rowVector2);
+        for (int col = 0; col < v; col++) {
+            myfile >> mat2[row2][col];
+        }
+        row2++;
+        if (row2 >= u) {
+            break;
+        }
+    }
+    cout << mat2 << '\n' << endl;
+
+    vector<vector<int>> product;
+    product = dotprod(mat1, mat2, x, y, v);
+
+    cout << product << '\n' << endl;
+
+/*    // Integer Encoder.
+
+    cout << "-------------------- Encryption --------------------" << endl;
+    auto begin_encrypt = Clock::now();
+
+
+    // vector<vector<int>> ---> vector< vector<ZZX>>
+    vector<vector<ZZX>> matrix;
+    matrix = int_to_ZZX(x, v, product);
+
+    cout << matrix << endl;
+
+    // Encrypt for all ZZX in mat
+    Ctxt enc(publicKey);
+    vector<vector<Ctxt>> ctxt_mat;
+
+    for (int i = 0; i < x; i++) {
+        vector<Ctxt> temp_ctxt;
+        for (int j = 0; j < v; j++) {
+            publicKey.Encrypt(enc, matrix[i][j]);
+            temp_ctxt.push_back(enc);
+        }
+        ctxt_mat.push_back(temp_ctxt);
+    }
+
+    auto end_encrypt = Clock::now();
+    cout << "Encryption Over!" << endl;
+    cout << "It took: " << duration_cast<seconds>(end_encrypt - begin_encrypt).count() << " seconds." << '\n' << endl;
+
+    cout << "-------------------- Operation --------------------" << endl;
+    cout << "Ciphertext before operations:" << endl;
+    cout << ctxt_mat << endl;
+
+//    cout << "Ciphertext after addition:" << endl;
+//    for (int i = 0; i < x; i++) {
+//        for (int j = 0; j < v; j++) {
+//            ctxt_mat[i][j].addCtxt(ctxt_mat[i][j]);
+//        }
+//    }
+//    cout << ctxt_mat << endl;
+
+//    cout << "Ciphertext after multiplication:" << endl;
+//    for (int i = 0; i < x; i++) {
+//        for (int j = 0; j < v; j++) {
+//            ctxt_mat[i][j].multiplyBy(ctxt_mat[i][j]);
+//        }
+//    }
+//    cout << ctxt_mat << endl;
+
+    vector<vector<ZZX>> mat_ans;
+    ZZX temp_store;
+
+    for (int i = 0; i < x; i++) {
+        vector<ZZX> mat_temp;
+        vector<Ctxt> temp_ctxt;
+        for (int j = 0; j < v; j++) {
+            secretKey.Decrypt(temp_store, ctxt_mat[i][j]);
+            mat_temp.push_back(temp_store);
+        }
+        mat_ans.push_back(mat_temp);
+    }
+
+    cout << "-------------------- Decryption --------------------" << endl;
+    cout << "Plaintext:  " << mat_ans << endl;
+
+    return 0;
 */
 
 
-/*    cout << "-------------------- Encryption --------------------" << endl;
+    // Fractional Encoder.
+
+    cout << "-------------------- Encryption --------------------" << endl;
     auto begin_encrypt = Clock::now();
 
-    //int x = 5;
-    //encode(x);
+    // for 1 single dec.
+    int rows, cols;
 
-    //ZZX msg;
+    ifstream infile;
+    infile.open("/home/karis/CLionProjects/HElib-basic/dec.txt");
+
+    // Tests if the file opens successfully.
+    if (!infile.is_open()) {
+        cout << "File failed to open!" << endl;
+    }
+
+    infile >> rows;
+    cout << rows << endl; // no. of rows
+    infile >> cols;
+    cout << cols << endl; // no. of cols
+
+    int row_count = 0;
+    vector<vector<double>> mat; // 2d array as a vector of vectors
+    vector<double> rowvec(cols);
+
+    // Storing the decimal matrix in mat.
+    cout << "This is the decimal matrix: " << endl;
+    while (infile.good()) {
+        mat.push_back(rowvec);
+        for (int col = 0; col < cols; col++) {
+            infile >> mat[row_count][col];
+        }
+        row_count++;
+        if (row_count >= rows) {
+            break;
+        }
+    }
+    cout << mat << '\n' << endl;
+
+    vector<vector<double>> dec;
+
+    dec = mat;
+
+    // The remaining decimal value: initial value - integer.
+    for (int i = 0; i < rows; i++) {
+        for (int j = 0; j < cols; j++) {
+            dec[i][j] = dec[i][j] - floor(dec[i][j]);
+        }
+    }
+
+    cout << "This is the remaining dec value: " << '\n' << dec << '\n' << endl;
+
+
+
+    // Rounding down the elements in mat to integers.
+    for (int i = 0; i < rows; i++) {
+        for (int j = 0; j < cols; j++) {
+            mat[i][j] = floor(mat[i][j]);
+            cout << mat[i][j] << " ";
+        }
+        cout << '\n' << endl;
+    }
+
+    // Matrix rounded down to integers.
+    cout << "Elements in matrix rounded down to int: " << '\n' << mat << '\n' << endl;
+
+    // Integer elements into polynomials.
+    cout << int_to_ZZX(x, v, mat) << endl;
+
+
+
+
+
+
+
+
     //SetCoeff(msg,1,1);
     //SetCoeff(msg,2,1); // 4 = x^2
 
-    cout << msg << endl;
+    //cout << msg << endl;
 
-    //ZZX msg2;
-    //SetCoeff(msg2,3,1); // 8 = 1000 = x^3
-
+/*
     Ctxt enc(publicKey), enc2(publicKey);
     publicKey.Encrypt(enc, msg);
     //publicKey.Encrypt(enc2, msg2);
@@ -181,48 +311,7 @@ int main() {
     ZZX ans;
     secretKey.Decrypt(ans, enc);
     cout << "Plaintext:  " << ans << endl;
-
-    return 0;
 */
-}
-
-
-
-/*
-void encode(int x) {
-
-    int remainder, digits = 0, dividend = x;
-
-    // Stops when the dividend becomes 0.
-    while (dividend != 0) {
-        dividend = dividend / 2;
-        digits++;
-    }
-
-    int arr[digits];
-
-    // Initialize dividend to be x again so that it doesnt use the updated dividend values.
-    dividend = x;
-
-    // Array placement starts from 0. First placement is the constant's binary.
-    for (int i = 0; i < digits; i++) {
-        remainder = dividend % 2;
-        arr[i] = remainder;
-        dividend = dividend / 2;
-    }
-
-
-    //ZZX msg;
-
-    // Prints out the array of binary numbers.
-    for (int i = 0; i < digits; i++) {
-        if (arr[i] == 1) {
-            return SetCoeff(msg, i);
-        }
-    }
-
-
 
 
 }
-*/

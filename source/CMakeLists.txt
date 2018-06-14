@@ -1,5 +1,5 @@
-set(SOURCE Baseline.cpp)
-#set(HEADERS ../include/xxx.h)
+set(SOURCE Baseline.cpp encoding.cpp)
+set(HEADERS ../include/encoding.h)
 add_executable(HElib-basic ${SOURCE} ${HEADERS})
 
 include_directories(${NTL_INCLUDE_DIRS})
