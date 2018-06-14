@@ -256,6 +256,11 @@ int main() {
 
     cout << "This is the remaining dec value: " << '\n' << dec << '\n' << endl;
 
+    // Decimal --> Binary
+
+
+
+
 
 
     // Rounding down the elements in mat to integers.
@@ -272,7 +277,6 @@ int main() {
 
     // Integer elements into polynomials.
     cout << int_to_ZZX(x, v, mat) << endl;
-
 
 
 
