@@ -12,6 +12,7 @@ using namespace chrono;
 
 typedef high_resolution_clock Clock;
 
+// integer to binary for SINGLE value.
 ZZX encode(int z) {
 
     ZZX ptxt;
@@ -36,8 +37,6 @@ ZZX encode(int z) {
         dividend = dividend / 2;
     }
 
-//    ZZX msg;
-
     // Prints out the array of binary numbers.
     for (int i = 0; i < digits; i++) {
         if (arr[i] == 1) {
@@ -49,9 +48,9 @@ ZZX encode(int z) {
 }
 
 
-vector<vector<int>> dotprod(vector<vector<int>> mat1, vector<vector<int>> mat2, int x, int y, int v) {
+vector<vector<double>> dotprod(vector<vector<int>> mat1, vector<vector<int>> mat2, int x, int y, int v) {
 
-    vector<vector<int>> mult;
+    vector<vector<double>> mult;
 
     // Dot Product.
     mult.resize(x);
@@ -73,6 +72,7 @@ vector<vector<int>> dotprod(vector<vector<int>> mat1, vector<vector<int>> mat2, 
 
 }
 
+// Integers to ZZX in matrix.
 vector<vector<ZZX>> int_to_ZZX(int x, int v, vector<vector<double>> product) {
 
     ZZX msg;
@@ -160,7 +160,50 @@ vector<vector<ZZX>> int_to_ZZX(int x, int v, vector<vector<double>> product) {
 //
 //}
 
-vector<vector<ZZX>> frac_to_ZZX() {
+// frac to binary for SINGLE value.
+ZZX frac_encoder(double z, int cols) {
 
+    ZZX ptxt;
+    vector<double> temp;
+    double frac_pt;
+
+    while (frac_pt != 0) {
+        double store = z * 2;
+        int int_pt = floor(store);
+        temp.push_back(int_pt);
+        frac_pt = store - int_pt;
+        z = frac_pt;
+    }
+
+    // Prints out the array of binary numbers.
+    for (int i = 0; i < cols; i++) {
+        if (temp[i] == 1) {
+            SetCoeff(ptxt, i);
+        }
+    }
+
+    return ptxt;
+
+}
+
+// Fractions to binary in matrix.
+vector<vector<ZZX>> frac_to_ZZX(int rows, int cols, vector<vector<double>> dec) {
+
+    ZZX msg;
+    vector<vector<ZZX>> binary;
+
+    // frac --> ZZX for each elements in product matrix.
+    cout << "frac to ZZX: " << endl;
+    for (int i = 0; i < rows; i++) {
+        vector<ZZX> temp;
+        for (int j = 0; j < cols; j++) {
+            long double z = dec[i][j];
+            msg = frac_encoder(z, cols);
+            temp.push_back(msg);
+        }
+        binary.push_back(temp);
+    }
+
+    return binary;
 
 }

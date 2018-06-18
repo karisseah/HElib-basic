@@ -27,7 +27,7 @@ int main() {
     cout << "-------------------- Initialization --------------------" << endl;
     auto begin_init = Clock::now();
 
-    long m = 1119;                                         // Specific modulus
+    long m = 30;                                         // Specific modulus
     long p = 17;                                        // Plaintext base
     long r = 1;                                         // Lifting
     long L = 5;                                         // Number of levels in the modulus chain
@@ -130,7 +130,7 @@ int main() {
     }
     cout << mat2 << '\n' << endl;
 
-    vector<vector<int>> product;
+    vector<vector<double>> product;
     product = dotprod(mat1, mat2, x, y, v);
 
     cout << product << '\n' << endl;
@@ -141,7 +141,7 @@ int main() {
     auto begin_encrypt = Clock::now();
 
 
-    // vector<vector<int>> ---> vector< vector<ZZX>>
+    // vector<vector<int>> ---> vector<vector<ZZX>>
     vector<vector<ZZX>> matrix;
     matrix = int_to_ZZX(x, v, product);
 
@@ -256,13 +256,6 @@ int main() {
 
     cout << "This is the remaining dec value: " << '\n' << dec << '\n' << endl;
 
-    // Decimal --> Binary
-
-
-
-
-
-
     // Rounding down the elements in mat to integers.
     for (int i = 0; i < rows; i++) {
         for (int j = 0; j < cols; j++) {
@@ -275,8 +268,16 @@ int main() {
     // Matrix rounded down to integers.
     cout << "Elements in matrix rounded down to int: " << '\n' << mat << '\n' << endl;
 
-    // Integer elements into polynomials.
-    cout << int_to_ZZX(x, v, mat) << endl;
+    // Conversion of integral part into binary/polynomial.
+    cout << int_to_ZZX(rows, cols, mat) << endl;
+
+    // Conversion of fractional part into binary/polynomial.
+    cout << frac_to_ZZX(rows, cols, dec) << endl;
+
+    // To get phim.
+    xdouble phim = to_xdouble(context.zMStar.getPhiM());
+    cout << phim << endl;
+
 
 
 
