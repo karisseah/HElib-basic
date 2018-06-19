@@ -48,7 +48,80 @@ ZZX encode(int z) {
     return ptxt;
 }
 
-vector<vector<double>> dotprod(vector<vector<int>> mat1, vector<vector<int>> mat2, int x, int y, int v) {
+vector<vector<double>> X() {
+
+    int x, y;
+
+    ifstream myfile;
+    myfile.open("/home/karis/CLionProjects/HElib-basic/matrix.txt");
+
+    // Tests if the file opens successfully.
+    if (!myfile.is_open()) {
+        cout << "File failed to open!" << endl;
+    }
+
+    myfile >> x;
+    //cout << x << endl; // no. of rows
+    myfile >> y;
+    //cout << y << endl; // no. of cols
+
+    vector<vector<double>> mat1;
+
+    mat1.resize(x);
+    for (int i = 0; i < mat1.size(); i++) {
+        mat1[i].resize(y);
+    }
+
+
+    cout << "This is the matrix X: " << endl;
+    for (int i = 0; i < x; i++) {
+        mat1[i][0] = 1;
+        for (int j = 0; j < y; j++) {
+            myfile >> mat1[i][j+1];
+            if (j >= y) {
+                break;
+            }
+        }
+    }
+
+    return mat1;
+
+}
+
+vector<vector<double>> Y() {
+
+    int x, y;
+
+    ifstream myfile;
+    myfile.open("/home/karis/CLionProjects/HElib-basic/matrix.txt");
+
+    // Tests if the file opens successfully.
+    if (!myfile.is_open()) {
+        cout << "File failed to open!" << endl;
+    }
+
+    myfile >> x;
+    //cout << x << endl; // no. of rows
+    myfile >> y;
+
+    vector<vector<double>> mat2;
+
+    mat2.resize(x);
+    for (int i = 0; i < mat2.size(); i++) {
+        mat2[i].resize(1);
+    }
+
+    for (int i = 0; i < x; i++) {
+        for (int j = 0; j < 1; j++) {
+            myfile >> mat2[i][j];
+        }
+    }
+
+    return mat2;
+
+}
+
+vector<vector<double>> dotprod(vector<vector<double>> mat1, vector<vector<double>> mat2, int x, int y, int v) {
 
     vector<vector<double>> mult;
 
@@ -215,5 +288,17 @@ vector<vector<ZZX>> frac_to_binary(int rows, int cols, vector<vector<double>> de
     }
 
     return binary;
+
+}
+
+vector<vector<double>> matrix_transpose(vector<vector<double>> product) {
+
+    vector<vector<double>> product_trans(product[0].size(), vector<double>(product.size()));
+
+    for (size_t i = 0; i < product.size(); ++i)
+        for (size_t j = 0; j < product[0].size(); ++j)
+            product_trans[j][i] = product[i][j];
+
+    return product_trans;
 
 }

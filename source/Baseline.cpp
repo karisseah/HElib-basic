@@ -67,7 +67,10 @@ int main() {
     cout << "It took: " << duration_cast<seconds>(end_init - begin_init).count() << " seconds." << endl;
 
     cout << endl;
-    int x, y, u, v;
+
+    cout << X() << endl;
+    cout << Y() << endl;
+/*    int x, y, u, v;
 
     ifstream myfile;
     myfile.open("/home/karis/CLionProjects/HElib-basic/matrix.txt");
@@ -83,11 +86,11 @@ int main() {
     //cout << y << endl; // no. of cols
 
     int row1 = 0;
-    vector<vector<int>> mat1; // 2d array as a vector of vectors
-    vector<int> rowVector1(y);
+    vector<vector<double>> mat1;
+    vector<double> rowVector1(y);
 
     cout << "This is the first matrix: " << endl;
-    while (myfile.good()) { // ... and while there are no errors,
+    while (myfile.good()) {
         mat1.push_back(rowVector1); // add a new row,
         for (int col = 0; col < y; col++) {
             myfile >> mat1[row1][col]; // fill the row with col elements
@@ -107,8 +110,8 @@ int main() {
     assert (y == u);
 
     int row2 = 0;
-    vector<vector<int> > mat2;
-    vector<int> rowVector2(v);
+    vector<vector<double>> mat2;
+    vector<double> rowVector2(v);
 
     cout << "This is the second matrix: " << endl;
     while (myfile.good()) {
@@ -127,6 +130,8 @@ int main() {
     product = dotprod(mat1, mat2, x, y, v);
 
     cout << product << '\n' << endl;
+*/
+
 /*
     // Encrypting matrix of integers.
     cout << Encrypt(m, p, r, L, c, w, x, v, product) << endl;
@@ -199,19 +204,21 @@ int main() {
 
     // To get phim.
     int phim = to_int(context.zMStar.getPhiM());
-    cout << phim << endl;
+    cout << phim << '\n' << endl;
 
-    double z = 0.625;
+    double z = 0.875;
     cout << frac_encoder(z, cols, phim)  << '\n' << endl;
 
     // Conversion of fractional part into binary.
     cout << frac_to_binary(rows, cols, dec, phim) << '\n' << endl;
 
     // Conversion of frac part to ZZX.
-    // Adding the int part and fractional part together. (??)
-    vector<vector<ZZX>> a = int_to_ZZX(rows, cols, mat);
-    vector<vector<ZZX>> b = frac_to_binary(rows, cols, dec, phim);
+    // Adding the int part and fractional part together.
+    //vector<vector<ZZX>> a = int_to_ZZX(rows, cols, mat);
+    //vector<vector<ZZX>> b = frac_to_binary(rows, cols, dec, phim);
     //cout << frac_to_ZZX(m, p, r, a, b) << endl;
+
+
 
 
 
