@@ -5,6 +5,7 @@
 #include "encoding.h"
 #include <iostream>
 #include <FHE.h>
+#include <math.h>
 
 using namespace std;
 using namespace NTL;
@@ -47,7 +48,6 @@ ZZX encode(int z) {
     return ptxt;
 }
 
-
 vector<vector<double>> dotprod(vector<vector<int>> mat1, vector<vector<int>> mat2, int x, int y, int v) {
 
     vector<vector<double>> mult;
@@ -76,7 +76,7 @@ vector<vector<double>> dotprod(vector<vector<int>> mat1, vector<vector<int>> mat
 vector<vector<ZZX>> int_to_ZZX(int x, int v, vector<vector<double>> product) {
 
     ZZX msg;
-    vector<vector<ZZX>> mat;
+    vector<vector<ZZX>> mat_int;
 
     // int --> ZZX for each elements in product matrix.
     cout << "int to ZZX: " << endl;
@@ -87,81 +87,91 @@ vector<vector<ZZX>> int_to_ZZX(int x, int v, vector<vector<double>> product) {
             msg = encode(z);
             temp.push_back(msg);
         }
-        mat.push_back(temp);
+        mat_int.push_back(temp);
     }
 
-    return mat;
+    return mat_int;
 
 }
 
-//vector<vector<ZZX>> Int_Encoder(int x, int v, FHEPubKey &publicKey, vector<vector<ZZX>> matrix, vector<vector<int>> product, FHESecKey secretKey(context)) {
-//
-//    auto begin_encrypt = Clock::now();
-//
-//    // vector<vector<int>> ---> vector< vector<ZZX>>
-//    matrix = int_to_ZZX(x, v, product);
-//
-//    cout << matrix << endl;
-//
-//    // Encrypt for all ZZX in mat
-//    Ctxt enc(publicKey);
-//    vector<vector<Ctxt>> ctxt_mat;
-//
+vector<vector<ZZX>> Encrypt(long m, long p, long r, long L, long c, long w, int x, int v, vector<vector<double>> product) {
+
+    FHEcontext context(m, p, r);
+    buildModChain(context, L, c);
+    FHESecKey secretKey(context);
+    FHEPubKey &publicKey = secretKey;
+    secretKey.GenSecKey(w);
+
+    vector<vector<ZZX>> matrix;
+
+    auto begin_encrypt = Clock::now();
+
+    // vector<vector<int>> ---> vector< vector<ZZX>>
+    matrix = int_to_ZZX(x, v, product);
+
+    cout << matrix << endl;
+
+    // Encrypt for all ZZX in mat
+    Ctxt enc(publicKey);
+    vector<vector<Ctxt>> ctxt_mat;
+
+    for (int i = 0; i < x; i++) {
+        vector<Ctxt> temp_ctxt;
+        for (int j = 0; j < v; j++) {
+            publicKey.Encrypt(enc, matrix[i][j]);
+            // cant run from here onwards.
+            temp_ctxt.push_back(enc);
+        }
+        ctxt_mat.push_back(temp_ctxt);
+    }
+
+    auto end_encrypt = Clock::now();
+    cout << "Encryption Over!" << endl;
+    cout << "It took: " << duration_cast<seconds>(end_encrypt - begin_encrypt).count() << " seconds." << '\n' << endl;
+
+    cout << "-------------------- Operation --------------------" << endl;
+    cout << "Ciphertext before operations:" << endl;
+    cout << ctxt_mat << endl;
+
+//    cout << "Ciphertext after addition:" << endl;
 //    for (int i = 0; i < x; i++) {
-//        vector<Ctxt> temp_ctxt;
 //        for (int j = 0; j < v; j++) {
-//            publicKey.Encrypt(enc, matrix[i][j]);
-//            temp_ctxt.push_back(enc);
+//            ctxt_mat[i][j].addCtxt(ctxt_mat[i][j]);
 //        }
-//        ctxt_mat.push_back(temp_ctxt);
 //    }
-//
-//    auto end_encrypt = Clock::now();
-//    cout << "Encryption Over!" << endl;
-//    cout << "It took: " << duration_cast<seconds>(end_encrypt - begin_encrypt).count() << " seconds." << '\n' << endl;
-//
-//    cout << "-------------------- Operation --------------------" << endl;
-//    cout << "Ciphertext before operations:" << endl;
 //    cout << ctxt_mat << endl;
-//
-////    cout << "Ciphertext after addition:" << endl;
-////    for (int i = 0; i < x; i++) {
-////        for (int j = 0; j < v; j++) {
-////            ctxt_mat[i][j].addCtxt(ctxt_mat[i][j]);
-////        }
-////    }
-////    cout << ctxt_mat << endl;
-//
-////    cout << "Ciphertext after multiplication:" << endl;
-////    for (int i = 0; i < x; i++) {
-////        for (int j = 0; j < v; j++) {
-////            ctxt_mat[i][j].multiplyBy(ctxt_mat[i][j]);
-////        }
-////    }
-////    cout << ctxt_mat << endl;
-//
-//    vector<vector<ZZX>> mat_ans;
-//    ZZX temp_store;
-//
+
+//    cout << "Ciphertext after multiplication:" << endl;
 //    for (int i = 0; i < x; i++) {
-//        vector<ZZX> mat_temp;
-//        vector<Ctxt> temp_ctxt;
 //        for (int j = 0; j < v; j++) {
-//            secretKey.Decrypt(temp_store, ctxt_mat[i][j]);
-//            mat_temp.push_back(temp_store);
+//            ctxt_mat[i][j].multiplyBy(ctxt_mat[i][j]);
 //        }
-//        mat_ans.push_back(mat_temp);
 //    }
-//
-//    cout << "-------------------- Decryption --------------------" << endl;
+//    cout << ctxt_mat << endl;
+
+    vector<vector<ZZX>> mat_ans;
+    ZZX temp_store;
+
+    for (int i = 0; i < x; i++) {
+        vector<ZZX> mat_temp;
+        vector<Ctxt> temp_ctxt;
+        for (int j = 0; j < v; j++) {
+            secretKey.Decrypt(temp_store, ctxt_mat[i][j]);
+            mat_temp.push_back(temp_store);
+        }
+        mat_ans.push_back(mat_temp);
+    }
+
+    cout << "-------------------- Decryption --------------------" << endl;
 //    cout << "Plaintext:  " << mat_ans << endl;
-//
-//    return 0;
-//
-//}
+    cout << "Plaintext:  " << endl;
+
+    return mat_ans;
+
+}
 
 // frac to binary for SINGLE value.
-ZZX frac_encoder(double z, int cols) {
+ZZX frac_encoder(double z, int cols, int phim) {
 
     ZZX ptxt;
     vector<double> temp;
@@ -175,10 +185,10 @@ ZZX frac_encoder(double z, int cols) {
         z = frac_pt;
     }
 
-    // Prints out the array of binary numbers.
-    for (int i = 0; i < cols; i++) {
+    // Add n to each exponent and flip the sign of each terms.
+    for (int i = 0; i < cols + phim; i++) {
         if (temp[i] == 1) {
-            SetCoeff(ptxt, i);
+            SetCoeff(ptxt, (-i-1) + phim, -1);
         }
     }
 
@@ -187,18 +197,18 @@ ZZX frac_encoder(double z, int cols) {
 }
 
 // Fractions to binary in matrix.
-vector<vector<ZZX>> frac_to_ZZX(int rows, int cols, vector<vector<double>> dec) {
+vector<vector<ZZX>> frac_to_binary(int rows, int cols, vector<vector<double>> dec, int phim) {
 
     ZZX msg;
     vector<vector<ZZX>> binary;
 
     // frac --> ZZX for each elements in product matrix.
-    cout << "frac to ZZX: " << endl;
+    cout << "frac to binary: " << endl;
     for (int i = 0; i < rows; i++) {
         vector<ZZX> temp;
         for (int j = 0; j < cols; j++) {
             long double z = dec[i][j];
-            msg = frac_encoder(z, cols);
+            msg = frac_encoder(z, cols, phim);
             temp.push_back(msg);
         }
         binary.push_back(temp);

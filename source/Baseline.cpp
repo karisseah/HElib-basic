@@ -27,7 +27,7 @@ int main() {
     cout << "-------------------- Initialization --------------------" << endl;
     auto begin_init = Clock::now();
 
-    long m = 30;                                         // Specific modulus
+    long m = 190;                                         // Specific modulus
     long p = 17;                                        // Plaintext base
     long r = 1;                                         // Lifting
     long L = 5;                                         // Number of levels in the modulus chain
@@ -65,13 +65,6 @@ int main() {
     auto end_init = Clock::now();
     cout << "FHE Ready!" << endl;
     cout << "It took: " << duration_cast<seconds>(end_init - begin_init).count() << " seconds." << endl;
-
-
-
-    // Encrypt for all ZZX in mat
-    // vector<vector<ZZX>> ---> vector< vector<Ctxt>>
-    // Call matrixproduct(vector< vector<Ctxt>>, vector< vector<Ctxt>>)
-
 
     cout << endl;
     int x, y, u, v;
@@ -134,82 +127,15 @@ int main() {
     product = dotprod(mat1, mat2, x, y, v);
 
     cout << product << '\n' << endl;
-
-/*    // Integer Encoder.
-
-    cout << "-------------------- Encryption --------------------" << endl;
-    auto begin_encrypt = Clock::now();
-
-
-    // vector<vector<int>> ---> vector<vector<ZZX>>
-    vector<vector<ZZX>> matrix;
-    matrix = int_to_ZZX(x, v, product);
-
-    cout << matrix << endl;
-
-    // Encrypt for all ZZX in mat
-    Ctxt enc(publicKey);
-    vector<vector<Ctxt>> ctxt_mat;
-
-    for (int i = 0; i < x; i++) {
-        vector<Ctxt> temp_ctxt;
-        for (int j = 0; j < v; j++) {
-            publicKey.Encrypt(enc, matrix[i][j]);
-            temp_ctxt.push_back(enc);
-        }
-        ctxt_mat.push_back(temp_ctxt);
-    }
-
-    auto end_encrypt = Clock::now();
-    cout << "Encryption Over!" << endl;
-    cout << "It took: " << duration_cast<seconds>(end_encrypt - begin_encrypt).count() << " seconds." << '\n' << endl;
-
-    cout << "-------------------- Operation --------------------" << endl;
-    cout << "Ciphertext before operations:" << endl;
-    cout << ctxt_mat << endl;
-
-//    cout << "Ciphertext after addition:" << endl;
-//    for (int i = 0; i < x; i++) {
-//        for (int j = 0; j < v; j++) {
-//            ctxt_mat[i][j].addCtxt(ctxt_mat[i][j]);
-//        }
-//    }
-//    cout << ctxt_mat << endl;
-
-//    cout << "Ciphertext after multiplication:" << endl;
-//    for (int i = 0; i < x; i++) {
-//        for (int j = 0; j < v; j++) {
-//            ctxt_mat[i][j].multiplyBy(ctxt_mat[i][j]);
-//        }
-//    }
-//    cout << ctxt_mat << endl;
-
-    vector<vector<ZZX>> mat_ans;
-    ZZX temp_store;
-
-    for (int i = 0; i < x; i++) {
-        vector<ZZX> mat_temp;
-        vector<Ctxt> temp_ctxt;
-        for (int j = 0; j < v; j++) {
-            secretKey.Decrypt(temp_store, ctxt_mat[i][j]);
-            mat_temp.push_back(temp_store);
-        }
-        mat_ans.push_back(mat_temp);
-    }
-
-    cout << "-------------------- Decryption --------------------" << endl;
-    cout << "Plaintext:  " << mat_ans << endl;
-
-    return 0;
+/*
+    // Encrypting matrix of integers.
+    cout << Encrypt(m, p, r, L, c, w, x, v, product) << endl;
 */
-
-
     // Fractional Encoder.
 
     cout << "-------------------- Encryption --------------------" << endl;
     auto begin_encrypt = Clock::now();
 
-    // for 1 single dec.
     int rows, cols;
 
     ifstream infile;
@@ -269,14 +195,28 @@ int main() {
     cout << "Elements in matrix rounded down to int: " << '\n' << mat << '\n' << endl;
 
     // Conversion of integral part into binary/polynomial.
-    cout << int_to_ZZX(rows, cols, mat) << endl;
-
-    // Conversion of fractional part into binary/polynomial.
-    cout << frac_to_ZZX(rows, cols, dec) << endl;
+    cout << int_to_ZZX(rows, cols, mat) << '\n' << endl;
 
     // To get phim.
-    xdouble phim = to_xdouble(context.zMStar.getPhiM());
+    int phim = to_int(context.zMStar.getPhiM());
     cout << phim << endl;
+
+    double z = 0.625;
+    cout << frac_encoder(z, cols, phim)  << '\n' << endl;
+
+    // Conversion of fractional part into binary.
+    cout << frac_to_binary(rows, cols, dec, phim) << '\n' << endl;
+
+    // Conversion of frac part to ZZX.
+    // Adding the int part and fractional part together. (??)
+    vector<vector<ZZX>> a = int_to_ZZX(rows, cols, mat);
+    vector<vector<ZZX>> b = frac_to_binary(rows, cols, dec, phim);
+    //cout << frac_to_ZZX(m, p, r, a, b) << endl;
+
+
+
+
+
 
 
 
