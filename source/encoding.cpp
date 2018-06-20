@@ -178,43 +178,62 @@ vector<vector<double>> dotprod(vector<vector<double>> mat1, vector<vector<double
 
 }
 
+
+
+
+
+
+
+
 // Inverse function.
-vector<vector<double>> Inv(vector<vector<double>> product, int y) {
+//vector<vector<double>> Det(vector<vector<double>> product, int y) {
+//
+//    vector<vector<double>> det;
+//
+//    det.resize(y);
+//    for (int i = 0; i < det.size(); i++) {
+//        det[i].resize(y);
+//    }
+//
+//    for (int i = 0; i < y; i++) {
+//        for (int j = 0; j < y; j++) {
+//            det[i][j] = product[i][j] * product[i+1][j+1];
+//        }
+//    }
+//
+//    return det;
+//
+//}
 
-    vector<vector<double>> Inverse;
-    double det = 0;
 
-    // Finding determinant.
-    for(int i = 0; i < y; i++)
-        //det = det + (product[0][i] * (product[1][(i+1)%3] * product[2][(i+2)%3] - product[1][(i+2)%3] * product[2][(i+1)%3]));
 
-    return Inverse;
-
-}
 
 
 // Integers to ZZX in matrix.
-vector<vector<ZZX>> int_to_ZZX(int x, int v, vector<vector<double>> product) {
+//vector<vector<ZZX>> int_to_ZZX(int x, int v, vector<vector<double>> product) {
+ZZX int_to_ZZX(int x, int v, vector<vector<double>> product) {
 
-    ZZX msg;
-    vector<vector<ZZX>> mat_int;
+    ZZX msg1;
+
+    //vector<vector<ZZX>> mat_int;
 
     // int --> ZZX for each elements in product matrix.
     cout << "int to ZZX: " << endl;
     for (int i = 0; i < x; i++) {
-        vector<ZZX> temp;
+        //vector<ZZX> temp;
         for (int j = 0; j < v; j++) {
-            int z = product[i][j];
-            msg = encode(z);
-            temp.push_back(msg);
+            double z = product[i][j];
+            msg1 = encode(z);
+            //temp.push_back(msg1);
         }
-        mat_int.push_back(temp);
+        //mat_int.push_back(temp);
     }
 
-    return mat_int;
+    //return mat_int;
+    return msg1;
 
 }
-
+/*
 vector<vector<ZZX>> Encrypt(long m, long p, long r, long L, long c, long w, int x, int v, vector<vector<double>> product) {
 
     FHEcontext context(m, p, r);
@@ -290,7 +309,7 @@ vector<vector<ZZX>> Encrypt(long m, long p, long r, long L, long c, long w, int 
     return mat_ans;
 
 }
-
+*/
 // frac to binary for SINGLE value.
 ZZX frac_encoder(double z, int cols, int phim) {
 
@@ -300,7 +319,7 @@ ZZX frac_encoder(double z, int cols, int phim) {
 
     while (frac_pt != 0) {
         double store = z * 2;
-        int int_pt = floor(store);
+        double int_pt = floor(store);
         temp.push_back(int_pt);
         frac_pt = store - int_pt;
         z = frac_pt;
@@ -318,23 +337,49 @@ ZZX frac_encoder(double z, int cols, int phim) {
 }
 
 // Fractions to binary in matrix.
-vector<vector<ZZX>> frac_to_binary(int rows, int cols, vector<vector<double>> dec, int phim) {
+//vector<vector<ZZX>> frac_to_binary(int rows, int cols, vector<vector<double>> dec, int phim) {
+ZZX frac_to_binary(int rows, int cols, vector<vector<double>> dec, int phim) {
 
-    ZZX msg;
-    vector<vector<ZZX>> binary;
+    ZZX msg2;
+
+    //vector<vector<ZZX>> binary;
 
     // frac --> ZZX for each elements in product matrix.
     cout << "frac to binary: " << endl;
     for (int i = 0; i < rows; i++) {
-        vector<ZZX> temp;
+        //vector<ZZX> temp;
         for (int j = 0; j < cols; j++) {
             long double z = dec[i][j];
-            msg = frac_encoder(z, cols, phim);
-            temp.push_back(msg);
+            msg2 = frac_encoder(z, cols, phim);
+            //temp.push_back(msg2);
         }
-        binary.push_back(temp);
+        //binary.push_back(temp);
     }
 
-    return binary;
+    //return binary;
+    return msg2;
+
+}
+
+// Adding the int part tgt with the frac part.
+vector<vector<ZZX>> frac_to_ZZX(int rows, int cols, ZZX msg1, ZZX msg2) {
+
+    vector<vector<ZZX>> polyn;
+
+    polyn.resize(rows);
+    for (int i = 0; i < polyn.size(); i++) {
+        polyn[i].resize(cols);
+    }
+
+    for (int i = 0; i < rows; i++) {
+        vector<ZZX> tempp;
+        for (int j = 0; j < cols; j++) {
+            ZZX pls = operator+(msg1, msg2);
+            tempp.push_back(pls);
+        }
+        polyn.push_back(tempp);
+    }
+
+    return polyn;
 
 }

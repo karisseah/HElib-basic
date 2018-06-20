@@ -69,10 +69,17 @@ int main() {
     cout << endl;
 
     cout << Y() << endl;
-    cout << Xtrans_X() << endl;
+    //cout << Xtrans_X() << endl;
 
     // trying if inverse works.
     //cout << Inv() << endl;
+
+
+
+
+
+
+
 
 
 
@@ -167,9 +174,9 @@ int main() {
     }
 
     infile >> rows;
-    cout << rows << endl; // no. of rows
+    //cout << rows << endl; // no. of rows
     infile >> cols;
-    cout << cols << endl; // no. of cols
+    //cout << cols << endl; // no. of cols
 
     int row_count = 0;
     vector<vector<double>> mat; // 2d array as a vector of vectors
@@ -215,7 +222,7 @@ int main() {
     cout << "Elements in matrix rounded down to int: " << '\n' << mat << '\n' << endl;
 
     // Conversion of integral part into binary/polynomial.
-    cout << int_to_ZZX(rows, cols, mat) << '\n' << endl;
+    //cout << int_to_ZZX(rows, cols, mat) << '\n' << endl;
 
     // To get phim.
     int phim = to_int(context.zMStar.getPhiM());
@@ -234,6 +241,8 @@ int main() {
     //cout << frac_to_ZZX(m, p, r, a, b) << endl;
 
 
+
+    cout << frac_to_ZZX(rows, cols, msg1, msg2) << endl;
 
 
 
