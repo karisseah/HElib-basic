@@ -68,8 +68,18 @@ int main() {
 
     cout << endl;
 
-    cout << X() << endl;
     cout << Y() << endl;
+    cout << Xtrans_X() << endl;
+
+    // trying if inverse works.
+    //cout << Inv() << endl;
+
+
+
+
+
+    // Can delete at the end.
+
 /*    int x, y, u, v;
 
     ifstream myfile;
@@ -131,6 +141,11 @@ int main() {
 
     cout << product << '\n' << endl;
 */
+
+
+
+
+
 
 /*
     // Encrypting matrix of integers.
