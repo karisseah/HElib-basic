@@ -173,7 +173,6 @@ vector<vector<ZZX>> Encrypt(long m, long p, long r, long L, long c, long w, int 
         vector<Ctxt> temp_ctxt;
         for (int j = 0; j < cols; j++) {
             publicKey.Encrypt(enc, matrix[i][j]);
-            // cant run from here onwards.
             temp_ctxt.push_back(enc);
         }
         ctxt_mat.push_back(temp_ctxt);
@@ -203,14 +202,21 @@ vector<vector<ZZX>> Encrypt(long m, long p, long r, long L, long c, long w, int 
 //    }
 //    cout << ctxt_mat << endl;
 
-    vector<vector<ZZX>> mat_ans;
-    ZZX temp_store;
+    vector<vector<double>> mat_ans;
+    double temp_store;
+    ZZX temp_store_zzx;
+
 
     for (int i = 0; i < rows; i++) {
-        vector<ZZX> mat_temp;
+        vector<double> mat_temp;
         vector<Ctxt> temp_ctxt;
         for (int j = 0; j < cols; j++) {
-            secretKey.Decrypt(temp_store, ctxt_mat[i][j]);
+            secretKey.Decrypt(temp_store_zzx, ctxt_mat[i][j]);
+            //decode temp_store_zzx into temp_store
+
+
+            return dec_value;
+
             mat_temp.push_back(temp_store);
         }
         mat_ans.push_back(mat_temp);

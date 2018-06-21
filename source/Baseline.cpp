@@ -117,10 +117,106 @@ int main() {
     // Finding the inverse of Xtrans_X.
     cout << Inv(y, product) << '\n' << endl;
 
+    // Fractional Encoder.
 
-    // Can delete at the end.
+    cout << "-------------------- Encryption --------------------" << endl;
+    auto begin_encrypt = Clock::now();
 
-/*    int x, y, u, v;
+    int rows, cols;
+
+    ifstream infile;
+    infile.open("/home/karis/CLionProjects/HElib-basic/dec.txt");
+
+    // Tests if the file opens successfully.
+    if (!infile.is_open()) {
+        cout << "File failed to open!" << endl;
+    }
+
+    infile >> rows;
+    //cout << rows << endl; // no. of rows
+    infile >> cols;
+    //cout << cols << endl; // no. of cols
+
+    int row_count = 0;
+    vector<vector<double>> mat; // 2d array as a vector of vectors
+    vector<double> rowvec(cols);
+
+    // Storing the decimal matrix in mat.
+    cout << "This is the decimal matrix: " << endl;
+//    while (infile.good()) {
+//        mat.push_back(rowvec);
+//        for (int col = 0; col < cols; col++) {
+//            infile >> mat[row_count][col];
+//        }
+//        row_count++;
+//        if (row_count >= rows) {
+//            break;
+//        }
+//    }
+//    cout << mat << '\n' << endl;
+    cout << mat1 << '\n' << endl;
+
+    vector<vector<double>> dec;
+
+//    dec = mat;
+    dec = mat1;
+
+    // The remaining decimal value: initial value - integer.
+    for (int i = 0; i < rows; i++) {
+        for (int j = 0; j < cols; j++) {
+            dec[i][j] = dec[i][j] - trunc(dec[i][j]);
+        }
+    }
+
+    cout << "This is the remaining dec value: " << '\n' << dec << '\n' << endl;
+
+    // Rounding down the elements in mat to integers.
+    for (int i = 0; i < rows; i++) {
+        for (int j = 0; j < cols; j++) {
+            mat1[i][j] = trunc(mat1[i][j]);
+            //mat[i][j] = trunc(mat[i][j]);
+            //cout << mat[i][j] << " ";
+        }
+        //cout << '\n' << endl;
+    }
+
+    // Matrix rounded down to integers.
+    cout << "Elements in matrix rounded down to int: " << '\n' << mat1 << '\n' << endl;
+//    cout << "Elements in matrix rounded down to int: " << '\n' << mat << '\n' << endl;
+
+    // To get phim.
+    int phim = to_int(context.zMStar.getPhiM());
+    //cout << phim << '\n' << endl;
+
+//    double z = 0.875;
+//    cout << frac_encoder(z, cols, phim)  << '\n' << endl;
+
+    // Encrypting the fraction.
+    cout << Encrypt(m, p, r, L, c, w, rows, cols, mat1, dec, phim) << endl;
+
+
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/*
+    // Before fractional encoder.
+
+    int x, y, u, v;
 
     ifstream myfile;
     myfile.open("/home/karis/CLionProjects/HElib-basic/matrix.txt");
@@ -181,98 +277,6 @@ int main() {
 
     cout << product << '\n' << endl;
 */
-
-
-
-    // Fractional Encoder.
-
-    cout << "-------------------- Encryption --------------------" << endl;
-    auto begin_encrypt = Clock::now();
-
-    int rows, cols;
-
-    ifstream infile;
-    infile.open("/home/karis/CLionProjects/HElib-basic/dec.txt");
-
-    // Tests if the file opens successfully.
-    if (!infile.is_open()) {
-        cout << "File failed to open!" << endl;
-    }
-
-    infile >> rows;
-    //cout << rows << endl; // no. of rows
-    infile >> cols;
-    //cout << cols << endl; // no. of cols
-
-    int row_count = 0;
-    vector<vector<double>> mat; // 2d array as a vector of vectors
-    vector<double> rowvec(cols);
-
-    // Storing the decimal matrix in mat.
-    cout << "This is the decimal matrix: " << endl;
-    while (infile.good()) {
-        mat.push_back(rowvec);
-        for (int col = 0; col < cols; col++) {
-            infile >> mat[row_count][col];
-        }
-        row_count++;
-        if (row_count >= rows) {
-            break;
-        }
-    }
-    cout << mat << '\n' << endl;
-
-    vector<vector<double>> dec;
-
-    dec = mat;
-
-    // The remaining decimal value: initial value - integer.
-    for (int i = 0; i < rows; i++) {
-        for (int j = 0; j < cols; j++) {
-            dec[i][j] = dec[i][j] - floor(dec[i][j]);
-        }
-    }
-
-    cout << "This is the remaining dec value: " << '\n' << dec << '\n' << endl;
-
-    // Rounding down the elements in mat to integers.
-    for (int i = 0; i < rows; i++) {
-        for (int j = 0; j < cols; j++) {
-            mat[i][j] = floor(mat[i][j]);
-            //cout << mat[i][j] << " ";
-        }
-        //cout << '\n' << endl;
-    }
-
-    // Matrix rounded down to integers.
-    cout << "Elements in matrix rounded down to int: " << '\n' << mat << '\n' << endl;
-
-    // To get phim.
-    int phim = to_int(context.zMStar.getPhiM());
-    //cout << phim << '\n' << endl;
-
-//    double z = 0.875;
-//    cout << frac_encoder(z, cols, phim)  << '\n' << endl;
-
-    // Encrypting the fraction.
-    cout << Encrypt(m, p, r, L, c, w, rows, cols, mat, dec, phim) << endl;
-
-
-
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
 
     //SetCoeff(msg,1,1);
     //SetCoeff(msg,2,1); // 4 = x^2
