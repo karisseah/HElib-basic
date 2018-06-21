@@ -10,9 +10,6 @@
 #include <iomanip>
 #include "powerful.h"
 #include "encoding.h"
-
-#include <string>
-#include <sstream>
 #include <math.h>
 
 using namespace std;
@@ -38,7 +35,7 @@ int main() {
     long s = 0;                                         // Minimum number of slots
 
     // Finding m
-	//m = FindM(k, L, c, p, d, s, 0);                     // Find a value for m given the params
+    //m = FindM(k, L, c, p, d, s, 0);                     // Find a value for m given the params
     cout << "m = " << m << endl;
 
     // Initializing context
@@ -58,7 +55,8 @@ int main() {
 //	addFrbMatrices(secretKey);                          // for Ctxt rotate
 
     // Helper Class for encryption and decryption
-    EncryptedArray ea(context, G);                      // Construct EncryptedArray object ea, associated with context and G
+    EncryptedArray ea(context,
+                      G);                      // Construct EncryptedArray object ea, associated with context and G
     long nslots = ea.size();                            // Number of slots in the plaintext encoding
     cout << "slots: " << nslots << endl;
 
@@ -68,16 +66,56 @@ int main() {
 
     cout << endl;
 
+    int x, y;
 
+    ifstream myfile;
+    myfile.open("/home/karis/CLionProjects/HElib-basic/dec.txt");
 
+    // Tests if the file opens successfully.
+    if (!myfile.is_open()) {
+        cout << "File failed to open!" << endl;
+    }
 
+    myfile >> x;
+    myfile >> y;
 
+    vector<vector<double>> mat1;
 
+    mat1.resize(x);
+    for (int i = 0; i < mat1.size(); i++) {
+        mat1[i].resize(y);
+    }
 
+    vector<vector<double>> mat2;
 
+    mat2.resize(x);
+    for (int i = 0; i < mat2.size(); i++) {
+        mat2[i].resize(1);
+    }
 
+    for (int i = 0; i < x; i++) {
+        mat1[i][0] = 1;
+        for (int j = 1; j < y; j++) {
+            myfile >> mat1[i][j];
+        }
+        myfile >> mat2[i][0];
+    }
 
+    cout << "Matrix X: " << mat1 << endl;
+    cout << "Matrix Y: " << mat2 << endl;
 
+    // Finding X transpose.
+    vector<vector<double>> mat1_trans;
+    mat1_trans = matrix_transpose(mat1);
+    cout << "X transpose: " << mat1_trans << endl;
+
+    // Product of X transpose and X.
+    vector<vector<double>> product;
+    product = dotprod(mat1_trans, mat1, x, y);
+    cout << "Xtrans_X: " << product << endl;
+
+    // Finding the inverse of Xtrans_X.
+    cout << Inv(y, product) << '\n' << endl;
 
 
     // Can delete at the end.
@@ -146,13 +184,6 @@ int main() {
 
 
 
-
-
-
-/*
-    // Encrypting matrix of integers.
-    cout << Encrypt(m, p, r, L, c, w, x, v, product) << endl;
-*/
     // Fractional Encoder.
 
     cout << "-------------------- Encryption --------------------" << endl;
@@ -208,82 +239,31 @@ int main() {
     for (int i = 0; i < rows; i++) {
         for (int j = 0; j < cols; j++) {
             mat[i][j] = floor(mat[i][j]);
-            cout << mat[i][j] << " ";
+            //cout << mat[i][j] << " ";
         }
-        cout << '\n' << endl;
+        //cout << '\n' << endl;
     }
 
     // Matrix rounded down to integers.
     cout << "Elements in matrix rounded down to int: " << '\n' << mat << '\n' << endl;
 
-    // Conversion of integral part into binary/polynomial.
-    //cout << int_to_ZZX(rows, cols, mat) << '\n' << endl;
-
     // To get phim.
     int phim = to_int(context.zMStar.getPhiM());
-    cout << phim << '\n' << endl;
+    //cout << phim << '\n' << endl;
 
-    double z = 0.875;
-    cout << frac_encoder(z, cols, phim)  << '\n' << endl;
+//    double z = 0.875;
+//    cout << frac_encoder(z, cols, phim)  << '\n' << endl;
 
     // Encrypting the fraction.
-    //cout << Encrypt(m, p, r, L, c, w, rows, cols, mat, dec, phim) << endl;
-
-    //cout << Xtrans_X() << endl;
+    cout << Encrypt(m, p, r, L, c, w, rows, cols, mat, dec, phim) << endl;
 
 
 
+}
 
 
 
-    int x, y;
 
-    ifstream myfile;
-    myfile.open("/home/karis/CLionProjects/HElib-basic/matrix.txt");
-
-    // Tests if the file opens successfully.
-    if (!myfile.is_open()) {
-        cout << "File failed to open!" << endl;
-    }
-
-    myfile >> x;
-    myfile >> y;
-
-    vector<vector<double>> mat1;
-
-    mat1.resize(x);
-    for (int i = 0; i < mat1.size(); i++) {
-        mat1[i].resize(y);
-    }
-
-    vector<vector<double>> mat2;
-
-    mat2.resize(x);
-    for (int i = 0; i < mat2.size(); i++) {
-        mat2[i].resize(1);
-    }
-
-    for (int i = 0; i < x; i++) {
-        mat1[i][0] = 1;
-        for (int j = 1; j < y; j++) {
-            myfile >> mat1[i][j];
-        }
-        myfile >> mat2[i][0];
-    }
-
-    cout << "This is the matrix X: " << mat1 << endl;
-//    cout << "This is the matrix Y: " << mat2 << endl;
-
-    vector<vector<double>> mat1_trans;
-    mat1_trans = matrix_transpose(mat1);
-    cout << "This is X transpose: " << mat1_trans << endl;
-
-    vector<vector<double>> product;
-    product = dotprod(mat1_trans, mat1, x, y);
-    cout << "This is Xtrans_X: " << product << endl;
-
-    // Getting the inverse of Xtrans_X.
-    cout << inv(x, product) << endl;
 
 
 
@@ -327,5 +307,7 @@ int main() {
     cout << "Plaintext:  " << ans << endl;
 */
 
-
-}
+/*
+    // Encrypting matrix of integers.
+    cout << Encrypt(m, p, r, L, c, w, x, v, product) << endl;
+*/

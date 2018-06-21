@@ -48,99 +48,6 @@ ZZX encode(int z) {
     return ptxt;
 }
 
-vector<vector<double>> Y() {
-
-    int x, y;
-
-    ifstream myfile;
-    myfile.open("/home/karis/CLionProjects/HElib-basic/matrix.txt");
-
-    // Tests if the file opens successfully.
-    if (!myfile.is_open()) {
-        cout << "File failed to open!" << endl;
-    }
-
-    myfile >> x;
-    myfile >> y;
-
-    vector<vector<double>> mat1;
-
-    mat1.resize(x);
-    for (int i = 0; i < mat1.size(); i++) {
-        mat1[i].resize(y);
-    }
-
-    vector<vector<double>> mat2;
-
-    mat2.resize(x);
-    for (int i = 0; i < mat2.size(); i++) {
-        mat2[i].resize(1);
-    }
-
-    cout << "This is the matrix Y: ";
-    for (int i = 0; i < x; i++) {
-        mat1[i][0] = 1;
-        for (int j = 1; j < y; j++) {
-            myfile >> mat1[i][j];
-        }
-        myfile >> mat2[i][0];
-    }
-
-    return mat2;
-
-}
-/*
-vector<vector<double>> Xtrans_X() {
-
-    int x, y;
-
-    ifstream myfile;
-    myfile.open("/home/karis/CLionProjects/HElib-basic/matrix.txt");
-
-    // Tests if the file opens successfully.
-    if (!myfile.is_open()) {
-        cout << "File failed to open!" << endl;
-    }
-
-    myfile >> x;
-    myfile >> y;
-
-    vector<vector<double>> mat1;
-
-    mat1.resize(x);
-    for (int i = 0; i < mat1.size(); i++) {
-        mat1[i].resize(y);
-    }
-
-    vector<vector<double>> mat2;
-
-    mat2.resize(x);
-    for (int i = 0; i < mat2.size(); i++) {
-        mat2[i].resize(1);
-    }
-
-    for (int i = 0; i < x; i++) {
-        mat1[i][0] = 1;
-        for (int j = 1; j < y; j++) {
-            myfile >> mat1[i][j];
-        }
-        myfile >> mat2[i][0];
-    }
-
-    cout << "This is the matrix X: " << mat1 << endl;
-//    cout << "This is the matrix Y: " << mat2 << endl;
-
-    vector<vector<double>> mat1_trans;
-    mat1_trans = matrix_transpose(mat1);
-    cout << "This is X transpose: " << mat1_trans << endl;
-
-    vector<vector<double>> product;
-    product = dotprod(mat1_trans, mat1, x, y);
-    cout << "This is Xtrans_X: ";
-    return product;
-
-}*/
-
 vector<vector<double>> matrix_transpose(vector<vector<double>> mat1) {
 
     vector<vector<double>> product_trans(mat1[0].size(), vector<double>(mat1.size()));
@@ -154,7 +61,8 @@ vector<vector<double>> matrix_transpose(vector<vector<double>> mat1) {
 }
 
 // should i change the vars all to mat1_trans and mat1..??
-vector<vector<double>> dotprod(vector<vector<double>> mat1, vector<vector<double>> mat2, int x, int y) {
+//vector<vector<double>> dotprod(vector<vector<double>> mat1, vector<vector<double>> mat2, int x, int y) {
+vector<vector<double>> dotprod(vector<vector<double>> mat1_trans, vector<vector<double>> mat1, int x, int y) {
 
     vector<vector<double>> mult;
 
@@ -169,7 +77,7 @@ vector<vector<double>> dotprod(vector<vector<double>> mat1, vector<vector<double
         for (int j = 0; j < y; j++) {
             mult[i][j] = 0;
             for (int k = 0; k < x; k++) {
-                mult[i][j] += mat1[i][k] * mat2[k][j];
+                mult[i][j] += mat1_trans[i][k] * mat1[k][j];
             }
         }
     }
@@ -178,76 +86,67 @@ vector<vector<double>> dotprod(vector<vector<double>> mat1, vector<vector<double
 
 }
 
+// Inverse function.
+vector<vector<double>> Inv(int y, vector<vector<double>> mult) {
 
+    double t, div;
 
-// Inverse.
-vector<vector<double>> inv(int x, vector<vector<double>> product) {
-
-    double t;
-
-    for(int i = 0; i < x; i++)
-    {
-        for(int j = x; j < 2 * x; j++)
-        {
-            if (i == j - x)
-                product[i][j] = 1;
-            else
-                product[i][j] = 0;
-        }
+    mult.resize(y);
+    for (int i = 0; i < mult.size(); i++) {
+        mult[i].resize(2 * y);
     }
 
-    for(int i = 0; i < x; i++)
-    {
-        t = product[i][i];
-        for(int j = i; j < 2 * x; j++)
-            product[i][j]=product[i][j]/t;
-        for(int j = 0; j < x; j++)
-        {
-            if(i!=j)
-            {
-                t=product[j][i];
-                for(int k = 0; k < 2 * x; k++)
-                    product[j][k] = product[j][k] - (t * product[i][k]);
+    for(int i = 0; i < y; i++) {
+        for(int j = y; j < 2 * y; j++) {
+            if (i == j - y) {
+                mult[i][j] = 1;
+            }
+            else {
+                mult[i][j] = 0;
             }
         }
     }
-    cout<<"\n\nInverse matrix\n\n";
-    for(int i = 0; i < x; i++)
+
+    for(int i = 0; i < y; i++)
     {
-        for(int j = x; j < 2 * x; j++)
-            cout<<product[i][j];
-        cout<<"\n";
+        t = mult[i][i];
+        for(int j = i; j < 2 * y; j++)
+            mult[i][j]=mult[i][j]/t;
+        for(int j = 0; j < y; j++)
+        {
+            if(i!=j)
+            {
+                t=mult[j][i];
+                for(int k = 0; k < 2 * y; k++)
+                    mult[j][k] = mult[j][k] - (t * mult[i][k]);
+            }
+            div = mult[0][0];
+        }
     }
 
+    cout<<"Inverse matrix of Xtrans_X is: ";
+    for(int i = 0; i < y; i++) {
+        for(int j = y; j < 2 * y; j++) {
+            mult[i][j] = mult[i][j] / div;
+        }
+        for (int j = 0; j < 2 * y; j++) {
+            // Bring forward the inverse matrix.
+            mult[i][j] = mult[i][j+y];
+            if (j+y >= 2 * y) {
+                break;
+            }
+        }
+    }
+
+    // Resize the matrix to keep only the inverse matrix.
+    mult.resize(y);
+    for (int i = 0; i < mult.size(); i++) {
+        mult[i].resize(y);
+    }
+
+    return mult;
 
 }
-
-
-
-
-// Inverse function.
-//vector<vector<double>> Det(vector<vector<double>> product, int y) {
-//
-//    vector<vector<double>> det;
-//
-//    det.resize(y);
-//    for (int i = 0; i < det.size(); i++) {
-//        det[i].resize(y);
-//    }
-//
-//    for (int i = 0; i < y; i++) {
-//        for (int j = 0; j < y; j++) {
-//            det[i][j] = product[i][j] * product[i+1][j+1];
-//        }
-//    }
-//
-//    return det;
-//
-//}
-
-
-
-
 
 vector<vector<ZZX>> Encrypt(long m, long p, long r, long L, long c, long w, int rows, int cols, vector<vector<double>> mat, vector<vector<double>> dec, int phim) {
 
@@ -261,10 +160,10 @@ vector<vector<ZZX>> Encrypt(long m, long p, long r, long L, long c, long w, int 
 
     auto begin_encrypt = Clock::now();
 
-    // Conversion of fractions to ZZX.
+    // Conversion of fractions (int part + dec part) to ZZX.
     matrix = frac_to_ZZX(rows, cols, mat, dec, phim);
 
-    cout << matrix << endl;
+    cout << matrix << '\n' << endl;
 
     // Encrypt for all ZZX in mat
     Ctxt enc(publicKey);
@@ -318,7 +217,6 @@ vector<vector<ZZX>> Encrypt(long m, long p, long r, long L, long c, long w, int 
     }
 
     cout << "-------------------- Decryption --------------------" << endl;
-//    cout << "Plaintext:  " << mat_ans << endl;
     cout << "Plaintext:  " << endl;
 
     return mat_ans;
@@ -380,7 +278,111 @@ vector<vector<ZZX>> frac_to_ZZX(int rows, int cols, vector<vector<double>> mat, 
 
 }
 
+
+
+
+
+
+
+
+
+
+
+
 /*
+vector<vector<double>> Y() {
+
+    int x, y;
+
+    ifstream myfile;
+    myfile.open("/home/karis/CLionProjects/HElib-basic/matrix.txt");
+
+    // Tests if the file opens successfully.
+    if (!myfile.is_open()) {
+        cout << "File failed to open!" << endl;
+    }
+
+    myfile >> x;
+    myfile >> y;
+
+    vector<vector<double>> mat1;
+
+    mat1.resize(x);
+    for (int i = 0; i < mat1.size(); i++) {
+        mat1[i].resize(y);
+    }
+
+    vector<vector<double>> mat2;
+
+    mat2.resize(x);
+    for (int i = 0; i < mat2.size(); i++) {
+        mat2[i].resize(1);
+    }
+
+    cout << "This is the matrix Y: ";
+    for (int i = 0; i < x; i++) {
+        mat1[i][0] = 1;
+        for (int j = 1; j < y; j++) {
+            myfile >> mat1[i][j];
+        }
+        myfile >> mat2[i][0];
+    }
+
+    return mat2;
+
+}
+
+vector<vector<double>> Xtrans_X() {
+
+    int x, y;
+
+    ifstream myfile;
+    myfile.open("/home/karis/CLionProjects/HElib-basic/matrix.txt");
+
+    // Tests if the file opens successfully.
+    if (!myfile.is_open()) {
+        cout << "File failed to open!" << endl;
+    }
+
+    myfile >> x;
+    myfile >> y;
+
+    vector<vector<double>> mat1;
+
+    mat1.resize(x);
+    for (int i = 0; i < mat1.size(); i++) {
+        mat1[i].resize(y);
+    }
+
+    vector<vector<double>> mat2;
+
+    mat2.resize(x);
+    for (int i = 0; i < mat2.size(); i++) {
+        mat2[i].resize(1);
+    }
+
+    for (int i = 0; i < x; i++) {
+        mat1[i][0] = 1;
+        for (int j = 1; j < y; j++) {
+            myfile >> mat1[i][j];
+        }
+        myfile >> mat2[i][0];
+    }
+
+    cout << "This is the matrix X: " << mat1 << endl;
+//    cout << "This is the matrix Y: " << mat2 << endl;
+
+    vector<vector<double>> mat1_trans;
+    mat1_trans = matrix_transpose(mat1);
+    cout << "This is X transpose: " << mat1_trans << endl;
+
+    vector<vector<double>> product;
+    product = dotprod(mat1_trans, mat1, x, y);
+    cout << "This is Xtrans_X: ";
+    return product;
+
+}
+
 // Integers to ZZX in matrix.
 vector<vector<ZZX>> int_to_ZZX(int x, int v, vector<vector<double>> product) {
 
