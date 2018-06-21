@@ -89,7 +89,7 @@ vector<vector<double>> Y() {
     return mat2;
 
 }
-
+/*
 vector<vector<double>> Xtrans_X() {
 
     int x, y;
@@ -139,7 +139,7 @@ vector<vector<double>> Xtrans_X() {
     cout << "This is Xtrans_X: ";
     return product;
 
-}
+}*/
 
 vector<vector<double>> matrix_transpose(vector<vector<double>> mat1) {
 
@@ -180,7 +180,47 @@ vector<vector<double>> dotprod(vector<vector<double>> mat1, vector<vector<double
 
 
 
+// Inverse.
+vector<vector<double>> inv(int x, vector<vector<double>> product) {
 
+    double t;
+
+    for(int i = 0; i < x; i++)
+    {
+        for(int j = x; j < 2 * x; j++)
+        {
+            if (i == j - x)
+                product[i][j] = 1;
+            else
+                product[i][j] = 0;
+        }
+    }
+
+    for(int i = 0; i < x; i++)
+    {
+        t = product[i][i];
+        for(int j = i; j < 2 * x; j++)
+            product[i][j]=product[i][j]/t;
+        for(int j = 0; j < x; j++)
+        {
+            if(i!=j)
+            {
+                t=product[j][i];
+                for(int k = 0; k < 2 * x; k++)
+                    product[j][k] = product[j][k] - (t * product[i][k]);
+            }
+        }
+    }
+    cout<<"\n\nInverse matrix\n\n";
+    for(int i = 0; i < x; i++)
+    {
+        for(int j = x; j < 2 * x; j++)
+            cout<<product[i][j];
+        cout<<"\n";
+    }
+
+
+}
 
 
 
@@ -209,32 +249,7 @@ vector<vector<double>> dotprod(vector<vector<double>> mat1, vector<vector<double
 
 
 
-// Integers to ZZX in matrix.
-//vector<vector<ZZX>> int_to_ZZX(int x, int v, vector<vector<double>> product) {
-ZZX int_to_ZZX(int x, int v, vector<vector<double>> product) {
-
-    ZZX msg1;
-
-    //vector<vector<ZZX>> mat_int;
-
-    // int --> ZZX for each elements in product matrix.
-    cout << "int to ZZX: " << endl;
-    for (int i = 0; i < x; i++) {
-        //vector<ZZX> temp;
-        for (int j = 0; j < v; j++) {
-            double z = product[i][j];
-            msg1 = encode(z);
-            //temp.push_back(msg1);
-        }
-        //mat_int.push_back(temp);
-    }
-
-    //return mat_int;
-    return msg1;
-
-}
-/*
-vector<vector<ZZX>> Encrypt(long m, long p, long r, long L, long c, long w, int x, int v, vector<vector<double>> product) {
+vector<vector<ZZX>> Encrypt(long m, long p, long r, long L, long c, long w, int rows, int cols, vector<vector<double>> mat, vector<vector<double>> dec, int phim) {
 
     FHEcontext context(m, p, r);
     buildModChain(context, L, c);
@@ -246,8 +261,8 @@ vector<vector<ZZX>> Encrypt(long m, long p, long r, long L, long c, long w, int 
 
     auto begin_encrypt = Clock::now();
 
-    // vector<vector<int>> ---> vector< vector<ZZX>>
-    matrix = int_to_ZZX(x, v, product);
+    // Conversion of fractions to ZZX.
+    matrix = frac_to_ZZX(rows, cols, mat, dec, phim);
 
     cout << matrix << endl;
 
@@ -255,9 +270,9 @@ vector<vector<ZZX>> Encrypt(long m, long p, long r, long L, long c, long w, int 
     Ctxt enc(publicKey);
     vector<vector<Ctxt>> ctxt_mat;
 
-    for (int i = 0; i < x; i++) {
+    for (int i = 0; i < rows; i++) {
         vector<Ctxt> temp_ctxt;
-        for (int j = 0; j < v; j++) {
+        for (int j = 0; j < cols; j++) {
             publicKey.Encrypt(enc, matrix[i][j]);
             // cant run from here onwards.
             temp_ctxt.push_back(enc);
@@ -292,10 +307,10 @@ vector<vector<ZZX>> Encrypt(long m, long p, long r, long L, long c, long w, int 
     vector<vector<ZZX>> mat_ans;
     ZZX temp_store;
 
-    for (int i = 0; i < x; i++) {
+    for (int i = 0; i < rows; i++) {
         vector<ZZX> mat_temp;
         vector<Ctxt> temp_ctxt;
-        for (int j = 0; j < v; j++) {
+        for (int j = 0; j < cols; j++) {
             secretKey.Decrypt(temp_store, ctxt_mat[i][j]);
             mat_temp.push_back(temp_store);
         }
@@ -309,7 +324,7 @@ vector<vector<ZZX>> Encrypt(long m, long p, long r, long L, long c, long w, int 
     return mat_ans;
 
 }
-*/
+
 // frac to binary for SINGLE value.
 ZZX frac_encoder(double z, int cols, int phim) {
 
@@ -336,45 +351,26 @@ ZZX frac_encoder(double z, int cols, int phim) {
 
 }
 
-// Fractions to binary in matrix.
-//vector<vector<ZZX>> frac_to_binary(int rows, int cols, vector<vector<double>> dec, int phim) {
-ZZX frac_to_binary(int rows, int cols, vector<vector<double>> dec, int phim) {
-
-    ZZX msg2;
-
-    //vector<vector<ZZX>> binary;
-
-    // frac --> ZZX for each elements in product matrix.
-    cout << "frac to binary: " << endl;
-    for (int i = 0; i < rows; i++) {
-        //vector<ZZX> temp;
-        for (int j = 0; j < cols; j++) {
-            long double z = dec[i][j];
-            msg2 = frac_encoder(z, cols, phim);
-            //temp.push_back(msg2);
-        }
-        //binary.push_back(temp);
-    }
-
-    //return binary;
-    return msg2;
-
-}
-
 // Adding the int part tgt with the frac part.
-vector<vector<ZZX>> frac_to_ZZX(int rows, int cols, ZZX msg1, ZZX msg2) {
+//vector<vector<ZZX>> frac_to_ZZX(int rows, int cols, vector<vector<ZZX>> mat_int, vector<vector<ZZX>> binary, ZZX msg1, ZZX msg2) {
+vector<vector<ZZX>> frac_to_ZZX(int rows, int cols, vector<vector<double>> mat, vector<vector<double>> dec, int phim) {
 
+    ZZX msg1;
+    ZZX msg2;
     vector<vector<ZZX>> polyn;
 
-    polyn.resize(rows);
-    for (int i = 0; i < polyn.size(); i++) {
-        polyn[i].resize(cols);
-    }
-
+    cout << "fraction to ZZX: " << endl;
     for (int i = 0; i < rows; i++) {
         vector<ZZX> tempp;
         for (int j = 0; j < cols; j++) {
-            ZZX pls = operator+(msg1, msg2);
+            int z = mat[i][j];
+            // Int part --> ZZX.
+            msg1 = encode(z);
+            long double zz = dec[i][j];
+            // Fractional part --> ZZX.
+            msg2 = frac_encoder(zz, cols, phim);
+            // Adding the int and fractional parts tgt.
+            ZZX pls = msg1 + msg2;
             tempp.push_back(pls);
         }
         polyn.push_back(tempp);
@@ -383,3 +379,51 @@ vector<vector<ZZX>> frac_to_ZZX(int rows, int cols, ZZX msg1, ZZX msg2) {
     return polyn;
 
 }
+
+/*
+// Integers to ZZX in matrix.
+vector<vector<ZZX>> int_to_ZZX(int x, int v, vector<vector<double>> product) {
+
+    ZZX msg1;
+
+    vector<vector<ZZX>> mat_int;
+
+    // int --> ZZX for each elements in product matrix.
+    cout << "int to ZZX: " << endl;
+    for (int i = 0; i < x; i++) {
+        vector<ZZX> temp;
+        for (int j = 0; j < v; j++) {
+            int z = product[i][j];
+            msg1 = encode(z);
+            temp.push_back(msg1);
+        }
+        mat_int.push_back(temp);
+    }
+
+    return mat_int;
+
+}
+
+// Fractions to binary in matrix.
+vector<vector<ZZX>> frac_to_binary(int rows, int cols, vector<vector<double>> dec, int phim) {
+
+
+    ZZX msg2;
+
+    vector<vector<ZZX>> binary;
+
+    // frac --> ZZX for each elements in product matrix.
+    cout << "frac to binary: " << endl;
+    for (int i = 0; i < rows; i++) {
+        vector<ZZX> temp;
+        for (int j = 0; j < cols; j++) {
+            long double z = dec[i][j];
+            msg2 = frac_encoder(z, cols, phim);
+            temp.push_back(msg2);
+        }
+        binary.push_back(temp);
+    }
+
+    return binary;
+
+}*/

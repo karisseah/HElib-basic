@@ -68,11 +68,6 @@ int main() {
 
     cout << endl;
 
-    cout << Y() << endl;
-    //cout << Xtrans_X() << endl;
-
-    // trying if inverse works.
-    //cout << Inv() << endl;
 
 
 
@@ -231,21 +226,64 @@ int main() {
     double z = 0.875;
     cout << frac_encoder(z, cols, phim)  << '\n' << endl;
 
-    // Conversion of fractional part into binary.
-    cout << frac_to_binary(rows, cols, dec, phim) << '\n' << endl;
+    // Encrypting the fraction.
+    //cout << Encrypt(m, p, r, L, c, w, rows, cols, mat, dec, phim) << endl;
 
-    // Conversion of frac part to ZZX.
-    // Adding the int part and fractional part together.
-    //vector<vector<ZZX>> a = int_to_ZZX(rows, cols, mat);
-    //vector<vector<ZZX>> b = frac_to_binary(rows, cols, dec, phim);
-    //cout << frac_to_ZZX(m, p, r, a, b) << endl;
+    //cout << Xtrans_X() << endl;
 
 
 
-    cout << frac_to_ZZX(rows, cols, msg1, msg2) << endl;
 
 
 
+    int x, y;
+
+    ifstream myfile;
+    myfile.open("/home/karis/CLionProjects/HElib-basic/matrix.txt");
+
+    // Tests if the file opens successfully.
+    if (!myfile.is_open()) {
+        cout << "File failed to open!" << endl;
+    }
+
+    myfile >> x;
+    myfile >> y;
+
+    vector<vector<double>> mat1;
+
+    mat1.resize(x);
+    for (int i = 0; i < mat1.size(); i++) {
+        mat1[i].resize(y);
+    }
+
+    vector<vector<double>> mat2;
+
+    mat2.resize(x);
+    for (int i = 0; i < mat2.size(); i++) {
+        mat2[i].resize(1);
+    }
+
+    for (int i = 0; i < x; i++) {
+        mat1[i][0] = 1;
+        for (int j = 1; j < y; j++) {
+            myfile >> mat1[i][j];
+        }
+        myfile >> mat2[i][0];
+    }
+
+    cout << "This is the matrix X: " << mat1 << endl;
+//    cout << "This is the matrix Y: " << mat2 << endl;
+
+    vector<vector<double>> mat1_trans;
+    mat1_trans = matrix_transpose(mat1);
+    cout << "This is X transpose: " << mat1_trans << endl;
+
+    vector<vector<double>> product;
+    product = dotprod(mat1_trans, mat1, x, y);
+    cout << "This is Xtrans_X: " << product << endl;
+
+    // Getting the inverse of Xtrans_X.
+    cout << inv(x, product) << endl;
 
 
 
