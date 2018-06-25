@@ -7,6 +7,9 @@
 #include <FHE.h>
 #include <math.h>
 
+#include<sstream>
+#include<string>
+
 using namespace std;
 using namespace NTL;
 using namespace chrono;
@@ -60,9 +63,7 @@ vector<vector<double>> matrix_transpose(vector<vector<double>> mat1) {
 
 }
 
-// should i change the vars all to mat1_trans and mat1..??
-//vector<vector<double>> dotprod(vector<vector<double>> mat1, vector<vector<double>> mat2, int x, int y) {
-vector<vector<double>> dotprod(vector<vector<double>> mat1_trans, vector<vector<double>> mat1, int x, int y) {
+vector<vector<double>> dotprod(vector<vector<double>> mat1, vector<vector<double>> mat2, int x, int y) {
 
     vector<vector<double>> mult;
 
@@ -77,7 +78,7 @@ vector<vector<double>> dotprod(vector<vector<double>> mat1_trans, vector<vector<
         for (int j = 0; j < y; j++) {
             mult[i][j] = 0;
             for (int k = 0; k < x; k++) {
-                mult[i][j] += mat1_trans[i][k] * mat1[k][j];
+                mult[i][j] += mat1[i][k] * mat2[k][j];
             }
         }
     }
@@ -149,6 +150,7 @@ vector<vector<double>> Inv(int y, vector<vector<double>> mult) {
 }
 
 vector<vector<ZZX>> Encrypt(long m, long p, long r, long L, long c, long w, int rows, int cols, vector<vector<double>> mat, vector<vector<double>> dec, int phim) {
+//ZZX Encrypt(long m, long p, long r, long L, long c, long w, int rows, int cols, vector<vector<double>> mat, vector<vector<double>> dec, int phim) {
 
     FHEcontext context(m, p, r);
     buildModChain(context, L, c);
@@ -203,21 +205,29 @@ vector<vector<ZZX>> Encrypt(long m, long p, long r, long L, long c, long w, int 
 //    cout << ctxt_mat << endl;
 
     vector<vector<double>> mat_ans;
+    //vector<vector<ZZX>> mat_ans;
     double temp_store;
     ZZX temp_store_zzx;
 
-
     for (int i = 0; i < rows; i++) {
+        //vector<ZZX> mat_temp;
         vector<double> mat_temp;
         vector<Ctxt> temp_ctxt;
         for (int j = 0; j < cols; j++) {
             secretKey.Decrypt(temp_store_zzx, ctxt_mat[i][j]);
             //decode temp_store_zzx into temp_store
+            decode(temp_store_zzx, rows, cols, mat, phim);
+        }
+    }
+
+    cout << decode << endl;
 
 
-            return dec_value;
 
-            mat_temp.push_back(temp_store);
+
+
+/*
+            mat_temp.push_back(temp_store_zzx);
         }
         mat_ans.push_back(mat_temp);
     }
@@ -226,8 +236,51 @@ vector<vector<ZZX>> Encrypt(long m, long p, long r, long L, long c, long w, int 
     cout << "Plaintext:  " << endl;
 
     return mat_ans;
+*/
 
 }
+
+//double decode(ZZX temp_store_zzx, int rows, int cols, vector<vector<double>> mat, int phim) {
+ZZX decode(ZZX temp_store_zzx, int rows, int cols, vector<vector<double>> mat, int phim) {
+
+    ZZX pptxt;
+
+    cout << "After decoding: " << endl;
+    for (int i = 0; i < phim/2; i++) {
+        temp_store_zzx[i] *= pow(2, i);
+    }
+    // Code cant exit the above loop. !!
+    for (int i = 0; i >= phim/2; i++) {
+        if (temp_store_zzx[i] == coeff(temp_store_zzx, i)) {
+            // change the sign of the term and minus power n.
+            SetCoeff(pptxt, i - phim, -1 * coeff(temp_store_zzx, i));
+        }
+    }
+
+//    cout << "After decoding: " << endl;
+//    for (int i = 0; i < phim; i++) {
+//        // Fractional part.
+//        if (i > phim/2) {
+//            // DOESNT RUN AFTER HERE. !!
+//            // for every element
+//            if (temp_store_zzx[i] == coeff(temp_store_zzx, i)) {
+//                // change the sign of the term and minus power n.
+//                SetCoeff(pptxt, i - phim, -1 * coeff(temp_store_zzx, i));
+//            }
+//        }
+//        // Integer part.
+//        else {
+//            temp_store_zzx[i] *= pow(2, i);
+//        }
+//    }
+
+    return temp_store_zzx;
+
+
+
+}
+
+
 
 // frac to binary for SINGLE value.
 ZZX frac_encoder(double z, int cols, int phim) {
@@ -261,21 +314,22 @@ vector<vector<ZZX>> frac_to_ZZX(int rows, int cols, vector<vector<double>> mat, 
 
     ZZX msg1;
     ZZX msg2;
+    ZZX int_and_frac;
     vector<vector<ZZX>> polyn;
 
     cout << "fraction to ZZX: " << endl;
     for (int i = 0; i < rows; i++) {
         vector<ZZX> tempp;
         for (int j = 0; j < cols; j++) {
-            int z = mat[i][j];
+            int z1 = mat[i][j];
             // Int part --> ZZX.
-            msg1 = encode(z);
-            long double zz = dec[i][j];
+            msg1 = encode(z1);
+            long double z2 = dec[i][j];
             // Fractional part --> ZZX.
-            msg2 = frac_encoder(zz, cols, phim);
+            msg2 = frac_encoder(z2, cols, phim);
             // Adding the int and fractional parts tgt.
-            ZZX pls = msg1 + msg2;
-            tempp.push_back(pls);
+            int_and_frac = msg1 + msg2;
+            tempp.push_back(int_and_frac);
         }
         polyn.push_back(tempp);
     }

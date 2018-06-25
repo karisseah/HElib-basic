@@ -186,10 +186,12 @@ int main() {
 
     // To get phim.
     int phim = to_int(context.zMStar.getPhiM());
-    //cout << phim << '\n' << endl;
+    cout << phim << '\n' << endl;
 
-//    double z = 0.875;
-//    cout << frac_encoder(z, cols, phim)  << '\n' << endl;
+    //double z = 0.875;
+    //cout << frac_encoder(z, cols, phim)  << '\n' << endl;
+
+    //cout << frac_to_ZZX(rows, cols, mat1, dec, phim) << endl;
 
     // Encrypting the fraction.
     cout << Encrypt(m, p, r, L, c, w, rows, cols, mat1, dec, phim) << endl;
