@@ -15,12 +15,13 @@ ZZX encode(int x);
 vector<vector<double>> matrix_transpose(vector<vector<double>> product);
 vector<vector<double>> dotprod(vector<vector<double>> mat1, vector<vector<double>> mat2, int x, int y);
 vector<vector<double>> Inv(int y, vector<vector<double>> product);
-vector<vector<ZZX>> Encrypt(long m, long p, long r, long L, long c, long w, int rows, int cols, vector<vector<double>> mat, vector<vector<double>> dec, int phim);
+vector<vector<ZZ>> Encrypt(long m, long p, long r, long L, long c, long w, int rows, int cols, vector<vector<double>> mat, vector<vector<double>> dec, int phim);
 //ZZX Encrypt(long m, long p, long r, long L, long c, long w, int rows, int cols, vector<vector<double>> mat, vector<vector<double>> dec, int phim);
 ZZX frac_encoder(double z, int cols, int phim);
 vector<vector<ZZX>> frac_to_ZZX(int rows, int cols, vector<vector<double>> mat, vector<vector<double>> dec, int phim);
 //double decode(ZZX temp_store_zzx, int rows, int cols, vector<vector<double>> mat1, int phim);
-ZZX decode(ZZX temp_store_zzx, int rows, int cols, vector<vector<double>> mat1, int phim);
+//ZZX decode(ZZX temp_store_zzx, int rows, int cols, vector<vector<double>> mat1, int phim);
+//ZZ decode(ZZX temp_store_zzx, int rows, int cols, vector<vector<double>> mat, int phim);
 
 
 //vector<vector<double>> Y();
