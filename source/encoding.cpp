@@ -16,6 +16,37 @@ using namespace chrono;
 
 typedef high_resolution_clock Clock;
 
+int decodeINT(vector<vector<int>> poly, int rows, int cols)
+{
+
+    int result = 0;
+    for (int i = 0; i < rows; i++) {
+        for (int j = 0; j < cols; j++) {
+            result += poly[i][j] * pow(2, i);
+        }
+    }
+
+    return result;
+
+}
+//
+//int decodeINT(ZZX poly)
+//{
+//
+//    int result=0;
+//    for (int i=0 ; i<deg(poly) ; i++)
+//    {
+//
+//        int temp;
+//        conv(temp,poly[i]);
+//        result += temp * pow(2,i);
+//
+//        cout << result << endl;
+//    }
+//
+//    return result;
+//}
+
 // integer to binary for SINGLE value.
 ZZX encode(int z) {
 
@@ -149,8 +180,9 @@ vector<vector<double>> Inv(int y, vector<vector<double>> mult) {
 
 }
 
-vector<vector<ZZ>> Encrypt(long m, long p, long r, long L, long c, long w, int rows, int cols, vector<vector<double>> mat, vector<vector<double>> dec, int phim) {
-//ZZX Encrypt(long m, long p, long r, long L, long c, long w, int rows, int cols, vector<vector<double>> mat, vector<vector<double>> dec, int phim) {
+//vector<vector<double>> Encrypt(long m, long p, long r, long L, long c, long w, int rows, int cols, vector<vector<double>> mat, vector<vector<double>> dec, int phim) {
+//vector<vector<ZZ>> Encrypt(long m, long p, long r, long L, long c, long w, int rows, int cols, vector<vector<double>> mat, vector<vector<double>> dec, int phim) {
+vector<vector<vector<int>>> Encrypt(long m, long p, long r, long L, long c, long w, int rows, int cols, vector<vector<double>> mat, vector<vector<double>> dec, int phim) {
 
     FHEcontext context(m, p, r);
     buildModChain(context, L, c);
@@ -209,16 +241,11 @@ vector<vector<ZZ>> Encrypt(long m, long p, long r, long L, long c, long w, int r
     //double temp_store;
     ZZX temp_store_zzx;
 
+    vector<vector<int>> vvint;
+    vector<vector<vector<int>>> vvec_int;
 
-    ZZX pptxt;
-    ZZ temp_storee;
-    vector<ZZ> temp_store;
-    vector<vector<ZZ>> ans;
-    vector<ZZ> temp1_store;
-    ZZ temp1_storee;
-    ZZ final;
 
-    int counter = 0;
+
 
     for (int i = 0; i < rows; i++) {
         //vector<ZZ> mat_temp;
@@ -226,50 +253,80 @@ vector<vector<ZZ>> Encrypt(long m, long p, long r, long L, long c, long w, int r
         //vector<Ctxt> temp_ctxt;
         for (int j = 0; j < cols; j++) {
             secretKey.Decrypt(temp_store_zzx, ctxt_mat[i][j]);
-            //decode temp_store_zzx into temp_store
-            //decode(temp_store_zzx, rows, cols, mat, phim);
-            cout << "This is zzx before loop: " << temp_store_zzx << endl;
-//            for (int k = 0; k < temp_store_zzx.size(); k++) {
-
+            int integer;
+            vector<int> vec_int;
             for (int k = 0; k < phim; k++) {
-                counter++;
-
-                // Fractional part.
-//                if (k > temp_store_zzx.size() / 2) {
-                if (k > phim / 2) {
-                    // for every element
-                    if (temp_store_zzx[k] == coeff(temp_store_zzx, k)) {
-                        // -x^(n-i) --> x^i
-                        // SetCoeff(pptxt, -1 * (i - phim), -1 * coeff(pptxt, i)); --> **pptxt will be empty.
-                        SetCoeff(temp_store_zzx, -(k - phim), -coeff(temp_store_zzx, k));
-                    }
-                    // Exponent is negative i. x^(-i) --> 1 / x^i.
-                    double power = 1 / pow(2, k);
-                    // temp1_storee = pptxt[i] * power;
-                    temp1_storee += temp_store_zzx[k] * power;
-//                    if (temp_store_zzx[i] == []) {
-//                        break;
-//                    }
-                }
-                    // Integer part.
-                else {
-                    temp_storee += temp_store_zzx[k] * pow(2, i);
-//                    if (temp_store_zzx[i] == 0) {
-//                        break;
-//                    }
-                }
-                add(final, temp1_storee, temp_storee);
-                //temp_store.push_back(final);
+                conv(integer, temp_store_zzx[k]);
+                vec_int.push_back(integer);
             }
-            cout << "This is counter: " << counter << endl;
-            //ans.push_back(temp_store);
-            temp_store.push_back(final);
+            vvint.push_back(vec_int);
+            //cout << "vvint: " << vvint << endl << '\n';
         }
-        ans.push_back(temp_store);
+//        vvec_int.push_back(vvint);
+//        cout << "vvecint: " << vvec_int << endl;
     }
 
 
+    vector<vector<vector<int>>> storage;
 
+    storage.resize(rows);
+    for (int i = 0; i < storage.size(); i++) {
+        storage[i].resize(cols);
+    }
+    int variable = 0;
+    for (int i = 0; i < rows; i++) {
+        for (int j = 0; j < cols; j++) {
+                storage[i][j] = vvint[variable++];
+        }
+    }
+
+    return storage;
+
+/*
+    cout << vvec_int << endl;
+    cout << vvec_int[0][1][38] << endl;
+
+    vector<double> result_vec;
+    vector<vector<double>> result_vvec;
+
+
+    double result1 = 0;
+    double result2 = 0;
+    for (int i = 0; i < rows; i++) {
+        for (int j = 0; j < cols; j++) {
+            for (int k = 0; k < phim; k++) {
+                // Fractional part.
+                if (k >= phim / 2) {
+                    // -x^(n-i) --> x^i
+                    result1 += (-1*vvec_int[i][j][k]) * pow(2, k - phim);
+                }
+                // Integer part.
+                else {
+                    result2 += vvec_int[i][j][k] * pow(2, k);
+                }
+            }
+            cout << "this is frac value: " << result1 << endl;
+            cout << "this is int value: " << result2 << endl;
+            double final = result1 + result2;
+            result_vec.push_back(final);
+            result1 = 0;
+            result2 = 0;
+        }
+        result_vvec.push_back(result_vec);
+    }
+
+    result_vvec.resize(rows);
+    for (int i = 0; i < result_vvec.size(); i++) {
+        result_vvec[i].resize(cols);
+    }
+
+    cout << "-------------------- Decryption --------------------" << endl;
+    cout << "Plaintext:  " << endl;
+
+    return result_vvec;
+*/
+
+}
 
 
 
@@ -288,84 +345,52 @@ vector<vector<ZZ>> Encrypt(long m, long p, long r, long L, long c, long w, int r
         }
         mat_ans.push_back(mat_temp);
     }
-*/
-    cout << "-------------------- Decryption --------------------" << endl;
-    cout << "Plaintext:  " << endl;
+
+        cout << "-------------------- Decryption --------------------" << endl;
+        cout << "Plaintext:  " << endl;
 
 //    return mat_ans;
-    return ans;
+
+*/
 
 
 
-}
 
 /*
-//double decode(ZZX temp_store_zzx, int rows, int cols, vector<vector<double>> mat, int phim) {
-//ZZX decode(ZZX temp_store_zzx, int rows, int cols, vector<vector<double>> mat, int phim) {
-ZZ decode(ZZX temp_store_zzx, int rows, int cols, vector<vector<double>> mat, int phim) {
 
-    ZZX pptxt;
-    ZZ temp_storee;
-    vector<ZZ> temp_store;
-    vector<vector<ZZ>> what;
-
-//    cout << "After decoding: " << endl;
-//    for (int i = 0; i < phim/2; i++) {
-//        temp_storee = temp_store_zzx[i] *= pow(2, i);
-//        temp_store.push_back(temp_storee);
-//        if (temp_store_zzx[i] == 0) {
-//            break;
-//        }
-//    what.push_back(temp_store);
-//    break;
-//    }
-//    cout << "print" << endl;
-//    // Code cant exit the above loop. !!
-//    for (int i = 0; i >= phim/2; i++) {
-//        if (temp_store_zzx[i] == coeff(temp_store_zzx, i)) {
-//            // change the sign of the term and minus power n.
-//            SetCoeff(pptxt, i - phim, -1 * coeff(temp_store_zzx, i));
-//        }
-//    }
-
-    vector<ZZ> temp1_store;
-    vector<vector<ZZ>> whut;
-    ZZ temp1_storee;
-    ZZ finally;
-
-    cout << "After decoding: " << endl;
-    for (int i = 0; i < phim; i++) {
+    cout << "This is zzx before loop: " << temp_store_zzx << endl;
+//            for (int k = 0; k < temp_store_zzx.size(); k++) {
+    for (int k = 0; k < phim; k++) {
         // Fractional part.
-        if (i > phim/2) {
-            // DOESNT RUN AFTER HERE. !!
-            // for every element
-            if (temp_store_zzx[i] == coeff(temp_store_zzx, i)) {
-                // change the sign of the term and minus power n.
-                SetCoeff(pptxt, i - phim, -1 * coeff(temp_store_zzx, i));
-            }
-            temp1_storee = pptxt[i] * pow(2, i);
-            //temp1_store.push_back(temp1_storee);
+//                if (k > temp_store_zzx.size() / 2) {
+        if (k > phim / 2) {
+            // -x^(n-i) --> x^i
+            SetCoeff(temp_store_zzx, -(k - phim), -coeff(temp_store_zzx, k));
+//                    cout << "this is zzx after frac part loop: " << temp_store_zzx << endl;
+            // Exponent is negative i. x^(-i) --> 1 / x^i.
+            double power = 1 / pow(2, k);
+            // temp1_storee = pptxt[i] * power;
+            tempstore += temp_store_zzx[k] * power;
+            cout << "this is frac value: " << tempstore << endl;
         }
-        //whut.push_back(temp1_store);
-        // Integer part.
-        else {
-            temp_storee = temp_store_zzx[i] * pow(2, i);
-            finally = temp1_storee + temp_storee;
-            temp_store.push_back(finally);
-            if (temp_store_zzx[i] == 0) {
-                break;
-            }
-            what.push_back(temp_store);
-            break;
+            // Integer part.
+        else if (k <= phim / 2) {
+            tempstore1 += temp_store_zzx[k] * pow(2, i);
+            cout << "this is int value: " << tempstore1 << endl;
         }
+        add(final, tempstore, tempstore1);
+        final_val = final % p;
+//                cout << "this is the decimal: " << final_val << endl;
     }
-
-//    return temp_store_zzx;
-    return finally;
-
-
+    temp_store.push_back(final_val);
 }
-*/
+ans.push_back(temp_store);
+
+ */
+
+
+
+
 
 
 // frac to binary for SINGLE value.
@@ -387,6 +412,10 @@ ZZX frac_encoder(double z, int cols, int phim) {
     for (int i = 0; i < cols + phim; i++) {
         if (temp[i] == 1) {
             SetCoeff(ptxt, (-i-1) + phim, -1);
+            // If fractional part overflows into int part, equate to 0.
+            for (int k = 0; k <= phim / 2; k++) {
+                ptxt[k] = 0;
+            }
         }
     }
 
@@ -407,10 +436,10 @@ vector<vector<ZZX>> frac_to_ZZX(int rows, int cols, vector<vector<double>> mat, 
     for (int i = 0; i < rows; i++) {
         vector<ZZX> tempp;
         for (int j = 0; j < cols; j++) {
-            int z1 = mat[i][j];
+            double z1 = mat[i][j];
             // Int part --> ZZX.
             msg1 = encode(z1);
-            long double z2 = dec[i][j];
+            double z2 = dec[i][j];
             // Fractional part --> ZZX.
             msg2 = frac_encoder(z2, cols, phim);
             // Adding the int and fractional parts tgt.

@@ -55,8 +55,7 @@ int main() {
 //	addFrbMatrices(secretKey);                          // for Ctxt rotate
 
     // Helper Class for encryption and decryption
-    EncryptedArray ea(context,
-                      G);                      // Construct EncryptedArray object ea, associated with context and G
+    EncryptedArray ea(context, G);                      // Construct EncryptedArray object ea, associated with context and G
     long nslots = ea.size();                            // Number of slots in the plaintext encoding
     cout << "slots: " << nslots << endl;
 
@@ -122,7 +121,7 @@ int main() {
     cout << "-------------------- Encryption --------------------" << endl;
     auto begin_encrypt = Clock::now();
 
-    int rows, cols;
+/*    int rows, cols;
 
     ifstream infile;
     infile.open("/home/karis/CLionProjects/HElib-basic/dec.txt");
@@ -140,6 +139,9 @@ int main() {
     int row_count = 0;
     vector<vector<double>> mat; // 2d array as a vector of vectors
     vector<double> rowvec(cols);
+*/
+
+
 
     // Storing the decimal matrix in mat.
     cout << "This is the decimal matrix: " << endl;
@@ -162,8 +164,8 @@ int main() {
     dec = mat1;
 
     // The remaining decimal value: initial value - integer.
-    for (int i = 0; i < rows; i++) {
-        for (int j = 0; j < cols; j++) {
+    for (int i = 0; i < x; i++) {
+        for (int j = 0; j < y; j++) {
             dec[i][j] = dec[i][j] - trunc(dec[i][j]);
         }
     }
@@ -171,8 +173,8 @@ int main() {
     cout << "This is the remaining dec value: " << '\n' << dec << '\n' << endl;
 
     // Rounding down the elements in mat to integers.
-    for (int i = 0; i < rows; i++) {
-        for (int j = 0; j < cols; j++) {
+    for (int i = 0; i < x; i++) {
+        for (int j = 0; j < y; j++) {
             mat1[i][j] = trunc(mat1[i][j]);
             //mat[i][j] = trunc(mat[i][j]);
             //cout << mat[i][j] << " ";
@@ -194,7 +196,8 @@ int main() {
     //cout << frac_to_ZZX(rows, cols, mat1, dec, phim) << endl;
 
     // Encrypting the fraction.
-    cout << Encrypt(m, p, r, L, c, w, rows, cols, mat1, dec, phim) << endl;
+    cout << Encrypt(m, p, r, L, c, w, x, y, mat1, dec, phim) << endl;
+
 
 
 
