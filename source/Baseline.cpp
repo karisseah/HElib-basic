@@ -196,7 +196,7 @@ int main() {
     //cout << frac_to_ZZX(rows, cols, mat1, dec, phim) << endl;
 
     // Encrypting the fraction.
-    cout << Encrypt(m, p, r, L, c, w, x, y, mat1, dec, phim) << endl;
+    cout << Encrypt_Decrypt(m, p, r, L, c, w, x, y, mat1, dec, phim) << endl;
 
 
 

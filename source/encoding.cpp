@@ -180,9 +180,7 @@ vector<vector<double>> Inv(int y, vector<vector<double>> mult) {
 
 }
 
-//vector<vector<double>> Encrypt(long m, long p, long r, long L, long c, long w, int rows, int cols, vector<vector<double>> mat, vector<vector<double>> dec, int phim) {
-//vector<vector<ZZ>> Encrypt(long m, long p, long r, long L, long c, long w, int rows, int cols, vector<vector<double>> mat, vector<vector<double>> dec, int phim) {
-vector<vector<vector<int>>> Encrypt(long m, long p, long r, long L, long c, long w, int rows, int cols, vector<vector<double>> mat, vector<vector<double>> dec, int phim) {
+vector<vector<double>> Encrypt_Decrypt(long m, long p, long r, long L, long c, long w, int rows, int cols, vector<vector<double>> mat, vector<vector<double>> dec, int phim) {
 
     FHEcontext context(m, p, r);
     buildModChain(context, L, c);
@@ -236,21 +234,10 @@ vector<vector<vector<int>>> Encrypt(long m, long p, long r, long L, long c, long
 //    }
 //    cout << ctxt_mat << endl;
 
-    //vector<vector<double>> mat_ans;
-    vector<vector<ZZ>> mat_ans;
-    //double temp_store;
     ZZX temp_store_zzx;
-
     vector<vector<int>> vvint;
-    vector<vector<vector<int>>> vvec_int;
-
-
-
 
     for (int i = 0; i < rows; i++) {
-        //vector<ZZ> mat_temp;
-        //vector<double> mat_temp;
-        //vector<Ctxt> temp_ctxt;
         for (int j = 0; j < cols; j++) {
             secretKey.Decrypt(temp_store_zzx, ctxt_mat[i][j]);
             int integer;
@@ -260,12 +247,8 @@ vector<vector<vector<int>>> Encrypt(long m, long p, long r, long L, long c, long
                 vec_int.push_back(integer);
             }
             vvint.push_back(vec_int);
-            //cout << "vvint: " << vvint << endl << '\n';
         }
-//        vvec_int.push_back(vvint);
-//        cout << "vvecint: " << vvec_int << endl;
     }
-
 
     vector<vector<vector<int>>> storage;
 
@@ -273,22 +256,16 @@ vector<vector<vector<int>>> Encrypt(long m, long p, long r, long L, long c, long
     for (int i = 0; i < storage.size(); i++) {
         storage[i].resize(cols);
     }
-    int variable = 0;
+
+    int index = 0;
     for (int i = 0; i < rows; i++) {
         for (int j = 0; j < cols; j++) {
-                storage[i][j] = vvint[variable++];
+                storage[i][j] = vvint[index++];
         }
     }
 
-    return storage;
-
-/*
-    cout << vvec_int << endl;
-    cout << vvec_int[0][1][38] << endl;
-
     vector<double> result_vec;
     vector<vector<double>> result_vvec;
-
 
     double result1 = 0;
     double result2 = 0;
@@ -298,21 +275,18 @@ vector<vector<vector<int>>> Encrypt(long m, long p, long r, long L, long c, long
                 // Fractional part.
                 if (k >= phim / 2) {
                     // -x^(n-i) --> x^i
-                    result1 += (-1*vvec_int[i][j][k]) * pow(2, k - phim);
+                    result1 += (-1*storage[i][j][k]) * pow(2, k - phim);
                 }
                 // Integer part.
                 else {
-                    result2 += vvec_int[i][j][k] * pow(2, k);
+                    result2 += storage[i][j][k] * pow(2, k);
                 }
             }
-            cout << "this is frac value: " << result1 << endl;
-            cout << "this is int value: " << result2 << endl;
             double final = result1 + result2;
             result_vec.push_back(final);
             result1 = 0;
             result2 = 0;
         }
-        result_vvec.push_back(result_vec);
     }
 
     result_vvec.resize(rows);
@@ -320,11 +294,18 @@ vector<vector<vector<int>>> Encrypt(long m, long p, long r, long L, long c, long
         result_vvec[i].resize(cols);
     }
 
+    int index1 = 0;
+    for (int i = 0; i < rows; i++) {
+        for (int j = 0; j < cols; j++) {
+            result_vvec[i][j] = result_vec[index1++];
+        }
+    }
+
     cout << "-------------------- Decryption --------------------" << endl;
-    cout << "Plaintext:  " << endl;
+    cout << "Plaintext:  ";
 
     return result_vvec;
-*/
+
 
 }
 
@@ -336,22 +317,6 @@ vector<vector<vector<int>>> Encrypt(long m, long p, long r, long L, long c, long
 
 
 
-//    return temp_store_zzx;
-
-//    cout << decode << endl;
-
-/*
-            mat_temp.push_back(finally);
-        }
-        mat_ans.push_back(mat_temp);
-    }
-
-        cout << "-------------------- Decryption --------------------" << endl;
-        cout << "Plaintext:  " << endl;
-
-//    return mat_ans;
-
-*/
 
 
 
