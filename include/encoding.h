@@ -11,19 +11,13 @@
 using namespace std;
 using namespace NTL;
 
-int decodeINT(ZZX poly);
+//int decodeINT(ZZX poly);
 ZZX encode(int x);
 vector<vector<double>> matrix_transpose(vector<vector<double>> product);
 vector<vector<double>> dotprod(vector<vector<double>> mat1, vector<vector<double>> mat2, int x, int y);
 vector<vector<double>> Inv(int y, vector<vector<double>> product);
-vector<vector<double>> Encrypt_Decrypt(long m, long p, long r, long L, long c, long w, int rows, int cols, vector<vector<double>> mat, vector<vector<double>> dec, int phim);
+vector<vector<double>> Encrypt_Decrypt(long m, long p, long r, long L, long c, long w, int rows, int cols, vector<vector<double>> mat, vector<vector<double>> dec, int phim, vector<vector<ZZX>> matrix);
 ZZX frac_encoder(double z, int cols, int phim);
 vector<vector<ZZX>> frac_to_ZZX(int rows, int cols, vector<vector<double>> mat, vector<vector<double>> dec, int phim);
-
-//vector<vector<double>> Y();
-//vector<vector<double>> Xtrans_X();
-//vector<vector<double>> Det(vector<vector<double>> product, int y);
-//vector<vector<ZZX>> int_to_ZZX(int x, int v, vector<vector<double>> product);
-//vector<vector<ZZX>> frac_to_binary (int rows, int cols, vector<vector<double>> dec, int phim);
 
 #endif //HELIB_BASIC_ENCODING_H

@@ -104,104 +104,143 @@ int main() {
     cout << "Matrix Y: " << mat2 << endl;
 
     // Finding X transpose.
-    vector<vector<double>> mat1_trans;
-    mat1_trans = matrix_transpose(mat1);
-    cout << "X transpose: " << mat1_trans << endl;
+    vector<vector<double>> mat_trans;
+    mat_trans = matrix_transpose(mat1);
+    cout << "X transpose: " << mat_trans << endl;
 
     // Product of X transpose and X.
     vector<vector<double>> product;
-    product = dotprod(mat1_trans, mat1, x, y);
+    product = dotprod(mat_trans, mat1, x, y);
     cout << "Xtrans_X: " << product << endl;
 
-    // Finding the inverse of Xtrans_X.
-    cout << Inv(y, product) << '\n' << endl;
-
-    // Fractional Encoder.
+    // X trans, Xtrans_X and XtransX_Inv.
+    vector<vector<double>> XtransX_Inv = Inv(y, product);
+    cout << XtransX_Inv << '\n' << endl;
 
     cout << "-------------------- Encryption --------------------" << endl;
     auto begin_encrypt = Clock::now();
 
-/*    int rows, cols;
+    // To get phim.
+    int phim = to_int(context.zMStar.getPhiM());
+    //cout << phim << '\n' << endl;
 
-    ifstream infile;
-    infile.open("/home/karis/CLionProjects/HElib-basic/dec.txt");
+    // FOR XTRANSX_INV.
 
-    // Tests if the file opens successfully.
-    if (!infile.is_open()) {
-        cout << "File failed to open!" << endl;
+    cout << "This is the decimal matrix: " << '\n' << XtransX_Inv << '\n' << endl;
+
+    vector<vector<double>> inv_dec;
+
+    inv_dec = XtransX_Inv;
+
+    // The remaining decimal value: initial value - integer.
+    for (int i = 0; i < y; i++) {
+        for (int j = 0; j < y; j++) {
+            inv_dec[i][j] = inv_dec[i][j] - trunc(inv_dec[i][j]);
+        }
     }
 
-    infile >> rows;
-    //cout << rows << endl; // no. of rows
-    infile >> cols;
-    //cout << cols << endl; // no. of cols
+    cout << "This is the remaining dec value: " << '\n' << inv_dec << '\n' << endl;
 
-    int row_count = 0;
-    vector<vector<double>> mat; // 2d array as a vector of vectors
-    vector<double> rowvec(cols);
-*/
+    vector<vector<double>> inv_int;
 
+    inv_int = XtransX_Inv;
 
+    for (int i = 0; i < y; i++) {
+        for (int j = 0; j < y; j++) {
+            inv_int[i][j] = trunc(XtransX_Inv[i][j]);
+            if (inv_int[i][j] == -0) {
+                inv_int[i][j] = 0;
+            }
+        }
+    }
 
-    // Storing the decimal matrix in mat.
-    cout << "This is the decimal matrix: " << endl;
-//    while (infile.good()) {
-//        mat.push_back(rowvec);
-//        for (int col = 0; col < cols; col++) {
-//            infile >> mat[row_count][col];
-//        }
-//        row_count++;
-//        if (row_count >= rows) {
-//            break;
-//        }
-//    }
-//    cout << mat << '\n' << endl;
-    cout << mat1 << '\n' << endl;
+    // Matrix rounded down to integers.
+    cout << "Elements in matrix rounded down to int: " << '\n' << inv_int << '\n' << endl;
 
-    vector<vector<double>> dec;
+    // Conversion of fractions (int part + dec part) to ZZX.
+    //cout << fracInv_to_ZZX(y, inv_int, inv_dec, phim) << endl;
+    vector<vector<ZZX>> inv_matrix;
+    inv_matrix = frac_to_ZZX(y, y, inv_int, inv_dec, phim);
+    //cout << inv_matrix <<endl;
 
-//    dec = mat;
-    dec = mat1;
+    vector<vector<double>> Enc_inv = Encrypt_Decrypt(m, p, r, L, c, w, y, y, inv_int, inv_dec, phim, inv_matrix);
+    cout << Enc_inv << '\n' << endl;
+
+    // FOR X.
+
+    cout << "This is the decimal matrix: " << '\n' << mat1 << '\n' << endl;
+
+    vector<vector<double>> x_dec;
+
+    x_dec = mat1;
 
     // The remaining decimal value: initial value - integer.
     for (int i = 0; i < x; i++) {
         for (int j = 0; j < y; j++) {
-            dec[i][j] = dec[i][j] - trunc(dec[i][j]);
+            x_dec[i][j] = x_dec[i][j] - trunc(x_dec[i][j]);
         }
     }
 
-    cout << "This is the remaining dec value: " << '\n' << dec << '\n' << endl;
+    cout << "This is the remaining dec value: " << '\n' << x_dec << '\n' << endl;
 
-    // Rounding down the elements in mat to integers.
+    vector<vector<double>> x_int;
+
+    x_int = mat1;
+
     for (int i = 0; i < x; i++) {
         for (int j = 0; j < y; j++) {
-            mat1[i][j] = trunc(mat1[i][j]);
-            //mat[i][j] = trunc(mat[i][j]);
-            //cout << mat[i][j] << " ";
+            x_int[i][j] = trunc(mat1[i][j]);
         }
-        //cout << '\n' << endl;
     }
 
     // Matrix rounded down to integers.
-    cout << "Elements in matrix rounded down to int: " << '\n' << mat1 << '\n' << endl;
-//    cout << "Elements in matrix rounded down to int: " << '\n' << mat << '\n' << endl;
+    cout << "Elements in matrix rounded down to int: " << '\n' << x_int << '\n' << endl;
 
-    // To get phim.
-    int phim = to_int(context.zMStar.getPhiM());
-    cout << phim << '\n' << endl;
+    // Conversion of fractions (int part + dec part) to ZZX.
+    vector<vector<ZZX>> x_matrix = frac_to_ZZX(x, y, x_int, x_dec, phim);
 
-    //double z = 0.875;
-    //cout << frac_encoder(z, cols, phim)  << '\n' << endl;
+    vector<vector<double>> Enc_x = Encrypt_Decrypt(m, p, r, L, c, w, x, y, x_int, x_dec, phim, x_matrix);
+    cout << Enc_x << '\n' << endl;
 
-    //cout << frac_to_ZZX(rows, cols, mat1, dec, phim) << endl;
+    // FOR Y.
 
-    // Encrypting the fraction.
-    cout << Encrypt_Decrypt(m, p, r, L, c, w, x, y, mat1, dec, phim) << endl;
+    cout << "This is the decimal matrix: " << '\n' << mat2 << '\n' << endl;
 
+    vector<vector<double>> y_dec;
 
+    y_dec = mat2;
 
+    // The remaining decimal value: initial value - integer.
+    for (int i = 0; i < x; i++) {
+        for (int j = 0; j < 1; j++) {
+            y_dec[i][j] = y_dec[i][j] - trunc(y_dec[i][j]);
+        }
+    }
+
+    cout << "This is the remaining dec value: " << '\n' << y_dec << '\n' << endl;
+
+    vector<vector<double>> y_int;
+
+    y_int = mat2;
+
+    for (int i = 0; i < x; i++) {
+        for (int j = 0; j < 1; j++) {
+            y_int[i][j] = trunc(mat2[i][j]);
+        }
+    }
+
+    // Matrix rounded down to integers.
+    cout << "Elements in matrix rounded down to int: " << '\n' << y_int << '\n' << endl;
+
+    // Conversion of fractions (int part + dec part) to ZZX.
+    vector<vector<ZZX>> y_matrix = frac_to_ZZX(x, 1, y_int, y_dec, phim);
+
+    vector<vector<double>> Enc_y = Encrypt_Decrypt(m, p, r, L, c, w, x, 1, y_int, y_dec, phim, y_matrix);
+    cout << Enc_y << '\n' << endl;
 
 }
+
+
 
 
 
