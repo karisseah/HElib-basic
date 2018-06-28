@@ -81,21 +81,21 @@ vector<vector<double>> matrix_transpose(vector<vector<double>> mat1) {
 
 }
 
-vector<vector<double>> dotprod(vector<vector<double>> mat1, vector<vector<double>> mat2, int x, int y) {
+vector<vector<double>> dotprod(vector<vector<double>> mat1, vector<vector<double>> mat2, int x, int y, int z) {
 
     vector<vector<double>> mult;
 
     // Dot Product.
-    mult.resize(y);
+    mult.resize(x);
     for (int i = 0; i < mult.size(); i++) {
         mult[i].resize(y);
     }
 
 //    cout << "Dot Product of Matrices: " << endl;
-    for (int i = 0; i < y; i++) {
+    for (int i = 0; i < x; i++) {
         for (int j = 0; j < y; j++) {
             mult[i][j] = 0;
-            for (int k = 0; k < x; k++) {
+            for (int k = 0; k < z; k++) {
                 mult[i][j] += mat1[i][k] * mat2[k][j];
             }
         }
@@ -143,7 +143,6 @@ vector<vector<double>> Inv(int y, vector<vector<double>> mult) {
         }
     }
 
-    cout<<"Inverse matrix of Xtrans_X is: ";
     for(int i = 0; i < y; i++) {
         for(int j = y; j < 2 * y; j++) {
             mult[i][j] = mult[i][j] / div;
@@ -167,15 +166,56 @@ vector<vector<double>> Inv(int y, vector<vector<double>> mult) {
 
 }
 
-vector<vector<double>> Encrypt_Decrypt(long m, long p, long r, long L, long c, long w, int rows, int cols, vector<vector<double>> mat, vector<vector<double>> dec, int phim, vector<vector<ZZX>> matrix) {
+vector<vector<double>> Frac_Part(vector<vector<double>> mat, int rows, int cols) {
+
+    vector<vector<double>> inv_dec;
+
+    inv_dec = mat;
+
+    // The remaining decimal value: initial value - integer.
+    for (int i = 0; i < rows; i++) {
+        for (int j = 0; j < cols; j++) {
+            inv_dec[i][j] = inv_dec[i][j] - trunc(inv_dec[i][j]);
+        }
+    }
+
+    cout << "This is the fractional value: ";
+    return inv_dec;
+
+}
+
+vector<vector<double>> Int_Part (vector<vector<double>> mat, int rows, int cols) {
+
+    vector<vector<double>> inv_int;
+
+    inv_int = mat;
+
+    for (int i = 0; i < rows; i++) {
+        for (int j = 0; j < cols; j++) {
+            inv_int[i][j] = trunc(mat[i][j]);
+            if (inv_int[i][j] == -0) {
+                inv_int[i][j] = 0;
+            }
+        }
+    }
+
+    // Matrix rounded down to integers.
+    cout << "This is the integer value: ";
+    return inv_int;
+
+}
+
+vector<vector<Ctxt>> Encrypt(long m, long p, long r, long L, long c, long w, int rows, int cols, vector<vector<ZZX>> matrix) {
+//vector<vector<int>> Encrypt_Decrypt(long m, long p, long r, long L, long c, long w, int rows, int cols, vector<vector<ZZX>> matrix, int phim) {
+
+    cout << "-------------------- Encryption --------------------" << endl;
+    auto begin_encrypt = Clock::now();
 
     FHEcontext context(m, p, r);
     buildModChain(context, L, c);
     FHESecKey secretKey(context);
     FHEPubKey &publicKey = secretKey;
     secretKey.GenSecKey(w);
-
-    auto begin_encrypt = Clock::now();
 
     // Encrypt for all ZZX in mat
     Ctxt enc(publicKey);
@@ -214,6 +254,39 @@ vector<vector<double>> Encrypt_Decrypt(long m, long p, long r, long L, long c, l
 //    }
 //    cout << ctxt_mat << endl;
 
+    return ctxt_mat;
+
+//    ZZX temp_store_zzx;
+//    vector<vector<int>> vvint;
+//
+//    for (int i = 0; i < rows; i++) {
+//        for (int j = 0; j < cols; j++) {
+//            // Decrypt each polynomial and store it in temp_store_zzx.
+//            secretKey.Decrypt(temp_store_zzx, ctxt_mat[i][j]);
+//            cout << "zzx: " << temp_store_zzx << endl;
+//            vector<int> vec_int;
+//            int integer;
+//            for (int k = 0; k < phim; k++) {
+//                // Convert each zz in temp_store_zzx into integer.
+//                conv(integer, temp_store_zzx[k]);
+//                vec_int.push_back(integer);
+//            }
+//            vvint.push_back(vec_int);
+//        }
+//    }
+//
+//    return vvint;
+
+}
+
+vector<vector<int>> Decrypt(long m, long p, long r, long L, long c, long w, int rows, int cols, vector<vector<Ctxt>> ctxt_mat, int phim) {
+
+    FHEcontext context(m, p, r);
+    buildModChain(context, L, c);
+    FHESecKey secretKey(context);
+    FHEPubKey &publicKey = secretKey;
+    secretKey.GenSecKey(w);
+
     ZZX temp_store_zzx;
     vector<vector<int>> vvint;
 
@@ -233,6 +306,12 @@ vector<vector<double>> Encrypt_Decrypt(long m, long p, long r, long L, long c, l
         }
     }
 
+    return vvint;
+
+}
+
+vector<vector<double>> Decode(int rows, int cols, vector<vector<int>> matrix, int phim) {
+
     vector<vector<vector<int>>> storage;
 
     storage.resize(rows);
@@ -243,7 +322,7 @@ vector<vector<double>> Encrypt_Decrypt(long m, long p, long r, long L, long c, l
     int index = 0;
     for (int i = 0; i < rows; i++) {
         for (int j = 0; j < cols; j++) {
-            storage[i][j] = vvint[index++];
+            storage[i][j] = matrix[index++];
         }
     }
 
@@ -258,10 +337,13 @@ vector<vector<double>> Encrypt_Decrypt(long m, long p, long r, long L, long c, l
             for (int k = 0; k < phim; k++) {
                 // Fractional part.
                 if (k > phim / 2) {
+                    if (storage[i][j][k] == 16) {
+                        storage[i][j][k] = -1;
+                    }
                     // -x^(n-i) --> x^i
                     result1 += (-1*storage[i][j][k]) * pow(2, k - phim);
                 }
-                // Integer part.
+                    // Integer part.
                 else {
                     result2 += storage[i][j][k] * pow(2, k);
                 }
@@ -290,7 +372,6 @@ vector<vector<double>> Encrypt_Decrypt(long m, long p, long r, long L, long c, l
     cout << "Plaintext:  ";
 
     return result_vvec;
-
 
 }
 
@@ -332,7 +413,7 @@ vector<vector<ZZX>> frac_to_ZZX(int rows, int cols, vector<vector<double>> mat, 
     ZZX int_and_frac;
     vector<vector<ZZX>> polyn;
 
-    cout << "fraction to ZZX: " << endl;
+    //cout << "fraction to ZZX: " << endl;
     for (int i = 0; i < rows; i++) {
         vector<ZZX> tempp;
         for (int j = 0; j < cols; j++) {
