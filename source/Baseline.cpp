@@ -1,5 +1,5 @@
 //
-// Created by junjie on 5/14/18.
+// Created by karis on 14/05/18.
 //
 
 #include <gtest/gtest.h>
@@ -10,6 +10,7 @@
 #include <iomanip>
 #include "powerful.h"
 #include "encoding.h"
+#include "MatrixUtility.h"
 #include <math.h>
 
 using namespace std;
@@ -51,8 +52,8 @@ int main() {
     FHESecKey secretKey(context);                       // Construct a secret key structure
     FHEPubKey &publicKey = secretKey;                   // An "upcast": FHESecKey is a subclass of FHEPubKey - Creates publicKey from secretKey
     secretKey.GenSecKey(w);                             // Generate a secret key with Hamming weight w
-//	addSome1DMatrices(secretKey);                       // apparently for key switching
-//	addFrbMatrices(secretKey);                          // for Ctxt rotate
+	addSome1DMatrices(secretKey);                       // apparently for key switching
+	//addFrbMatrices(secretKey);                          // for Ctxt rotate
 
     // Helper Class for encryption and decryption
     EncryptedArray ea(context, G);                      // Construct EncryptedArray object ea, associated with context and G
@@ -221,10 +222,12 @@ int main() {
     vector<vector<Ctxt>> y_enc = Encrypt(secretKey, w, x, 1, y_matrix);
 //    cout << y_enc << '\n' << endl;
 
+    cout << inv_enc.size() << " " << inv_enc[0].size() << endl;
+    cout << x_enc.size() << " " << x_enc[0].size() << endl;
     cout << "Ciphertext after multiplication:" << endl;
-    for (int i = 0; i < y; i++) {
-        for (int j = 0; j < y; j++) {
-            for (int k = 0; k < x; k++) {
+    for (int i = 0; i < inv_enc.size(); i++) {
+        for (int j = 0; j < inv_enc[0].size(); j++) {
+            for (int k = 0; k < x_enc.size(); k++) {
                 cout << i << j << k << endl;
                 inv_enc[i][k].multiplyBy(x_enc[k][j]);
                 //ctxt1_mat[i][j].multiplyBy2(ctxt2_mat[i][j], ctxt3_mat[i][j]);
@@ -233,11 +236,13 @@ int main() {
         }
     }
 
+
     for (int i = 0; i < y; i++) {
         for (int j = 0; j < 1; j++) {
             for (int k = 0; k < x; k++) {
-                inv_enc[i][k].multiplyBy(y_enc[k][j]);
-                //ctxt1_mat[i][j].multiplyBy2(ctxt2_mat[i][j], ctxt3_mat[i][j]);
+//                inv_enc[i][k].multiplyBy(y_enc[k][j]);
+//                ctxt1_mat[i][j].multiplyBy2(ctxt2_mat[i][j], ctxt3_mat[i][j]);
+         cout << "finish mult2" << endl;
             }
         }
     }

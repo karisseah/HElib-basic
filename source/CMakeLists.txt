@@ -1,5 +1,5 @@
-set(SOURCE Baseline.cpp encoding.cpp)
-set(HEADERS ../include/encoding.h)
+set(SOURCE Baseline.cpp encoding.cpp MatrixUtility.cpp)
+set(HEADERS ../include/encoding.h ../include/MatrixUtility.h)
 add_executable(HElib-basic ${SOURCE} ${HEADERS})
 
 include_directories(${NTL_INCLUDE_DIRS})

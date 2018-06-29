@@ -31,7 +31,8 @@ ExternalProject_Add(
         build-HElib
         DEPENDS build-ntl
         # URL https://github.com/shaih/HElib/archive/master.zip
-        URL ${CMAKE_CURRENT_SOURCE_DIR}/Helib-09052018.zip
+        #URL ${CMAKE_CURRENT_SOURCE_DIR}/Helib-09052018.zip
+        URL ${CMAKE_CURRENT_SOURCE_DIR}/HElib-24062017.zip
         CONFIGURE_COMMAND ""
         BUILD_COMMAND cd src && make -j${CORES_COUNT} CFLAGS=${HElib_CFLAGS}
         INSTALL_COMMAND ""
