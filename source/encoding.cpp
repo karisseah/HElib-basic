@@ -84,12 +84,7 @@ vector<vector<double>> matrix_transpose(vector<vector<double>> mat1) {
 vector<vector<double>> dotprod(vector<vector<double>> mat1, vector<vector<double>> mat2, int x, int y, int z) {
 
     vector<vector<double>> mult;
-
-    // Dot Product.
-    mult.resize(x);
-    for (int i = 0; i < mult.size(); i++) {
-        mult[i].resize(y);
-    }
+    mult.resize(x, vector<double>(y));
 
 //    cout << "Dot Product of Matrices: " << endl;
     for (int i = 0; i < x; i++) {
@@ -157,6 +152,7 @@ vector<vector<double>> Inv(int y, vector<vector<double>> mult) {
     }
 
     // Resize the matrix to keep only the inverse matrix.
+
     mult.resize(y);
     for (int i = 0; i < mult.size(); i++) {
         mult[i].resize(y);
@@ -205,21 +201,23 @@ vector<vector<double>> Int_Part (vector<vector<double>> mat, int rows, int cols)
 
 }
 
-vector<vector<Ctxt>> Encrypt(long m, long p, long r, long L, long c, long w, int rows, int cols, vector<vector<ZZX>> matrix) {
-//vector<vector<int>> Encrypt_Decrypt(long m, long p, long r, long L, long c, long w, int rows, int cols, vector<vector<ZZX>> matrix, int phim) {
+//vector<vector<Ctxt>> Encrypt(long m, long p, long r, long L, long c, long w, int rows, int cols, vector<vector<ZZX>> matrix) {
+vector<vector<Ctxt>> Encrypt(FHESecKey secretKey, long w, int rows, int cols, vector<vector<ZZX>> matrix) {
 
     cout << "-------------------- Encryption --------------------" << endl;
     auto begin_encrypt = Clock::now();
 
-    FHEcontext context(m, p, r);
-    buildModChain(context, L, c);
-    FHESecKey secretKey(context);
+//    FHEcontext context(m, p, r);
+//    buildModChain(context, L, c);
+//    FHESecKey secretKey(context);
     FHEPubKey &publicKey = secretKey;
     secretKey.GenSecKey(w);
 
     // Encrypt for all ZZX in mat
     Ctxt enc(publicKey);
     vector<vector<Ctxt>> ctxt_mat;
+
+    vector<Ctxt> temp_ctxt;
 
     for (int i = 0; i < rows; i++) {
         vector<Ctxt> temp_ctxt;
@@ -236,7 +234,7 @@ vector<vector<Ctxt>> Encrypt(long m, long p, long r, long L, long c, long w, int
 
     cout << "-------------------- Operation --------------------" << endl;
     cout << "Ciphertext before operations:" << endl;
-    cout << ctxt_mat << endl;
+//    cout << ctxt_mat << endl;
 
 //    cout << "Ciphertext after addition:" << endl;
 //    for (int i = 0; i < x; i++) {
@@ -256,36 +254,87 @@ vector<vector<Ctxt>> Encrypt(long m, long p, long r, long L, long c, long w, int
 
     return ctxt_mat;
 
-//    ZZX temp_store_zzx;
-//    vector<vector<int>> vvint;
-//
-//    for (int i = 0; i < rows; i++) {
-//        for (int j = 0; j < cols; j++) {
-//            // Decrypt each polynomial and store it in temp_store_zzx.
-//            secretKey.Decrypt(temp_store_zzx, ctxt_mat[i][j]);
-//            cout << "zzx: " << temp_store_zzx << endl;
-//            vector<int> vec_int;
-//            int integer;
-//            for (int k = 0; k < phim; k++) {
-//                // Convert each zz in temp_store_zzx into integer.
-//                conv(integer, temp_store_zzx[k]);
-//                vec_int.push_back(integer);
-//            }
-//            vvint.push_back(vec_int);
-//        }
-//    }
-//
-//    return vvint;
+}
+
+//vector<vector<Ctxt>> Encrypt_Multiplication(FHEcontext context, FHEPubKey *publicKey, int mid, int mid1, long m, long p, long r, long L, long c, long w, int rows, int cols, vector<vector<ZZX>> matrix1, vector<vector<ZZX>> matrix2, vector<vector<ZZX>> matrix3) {
+vector<vector<Ctxt>> Encrypt_Multiplication(FHESecKey secretKey, long w, int mid, int mid1, int rows, int cols, vector<vector<ZZX>> matrix1, vector<vector<ZZX>> matrix2, vector<vector<ZZX>> matrix3) {
+
+    cout << "-------------------- Encryption --------------------" << endl;
+    auto begin_encrypt = Clock::now();
+
+//    FHEcontext context(m, p, r);
+//    buildModChain(context, L, c);
+//    FHESecKey secretKey(context);
+    FHEPubKey &publicKey = secretKey;
+    secretKey.GenSecKey(w);
+
+    // Encrypt for all ZZX in mat
+    Ctxt enc(publicKey);
+    vector<vector<Ctxt>> ctxt1_mat;
+    vector<vector<Ctxt>> ctxt2_mat;
+    vector<vector<Ctxt>> ctxt3_mat;
+
+    for (int i = 0; i < rows; i++) {
+        vector<Ctxt> temp1_ctxt;
+        vector<Ctxt> temp2_ctxt;
+        vector<Ctxt> temp3_ctxt;
+        for (int j = 0; j < cols; j++) {
+            publicKey.Encrypt(enc, matrix1[i][j]);
+            temp1_ctxt.push_back(enc);
+//            publicKey.Encrypt(enc, matrix2[i][j]);
+//            temp2_ctxt.push_back(enc);
+//            publicKey.Encrypt(enc, matrix3[i][j]);
+//            temp3_ctxt.push_back(enc);
+            cout << "j = " << j << endl;
+        }
+        ctxt1_mat.push_back(temp1_ctxt);
+        ctxt2_mat.push_back(temp2_ctxt);
+//        ctxt3_mat.push_back(temp3_ctxt);
+        cout << "i = " << i << endl;
+    }
+
+    auto end_encrypt = Clock::now();
+    cout << "Encryption Over!" << endl;
+    cout << "It took: " << duration_cast<seconds>(end_encrypt - begin_encrypt).count() << " seconds." << '\n' << endl;
+
+    cout << "-------------------- Operation --------------------" << endl;
+    cout << "Ciphertext before operations:" << endl;
+    cout << "first ctxt: " << ctxt1_mat << endl;
+    cout << "second ctxt: " << ctxt2_mat << endl;
+    cout << "third ctxt: " << ctxt3_mat << endl;
+
+
+    cout << "Ciphertext after multiplication:" << endl;
+    for (int i = 0; i < rows; i++) {
+        for (int j = 0; j < cols; j++) {
+            for (int k = 0; k < mid; k++) {
+                ctxt1_mat[i][k].multiplyBy(ctxt2_mat[k][j]);
+                //ctxt1_mat[i][j].multiplyBy2(ctxt2_mat[i][j], ctxt3_mat[i][j]);
+            }
+        }
+    }
+
+    for (int i = 0; i < rows; i++) {
+        for (int j = 0; j < 1; j++) {
+            for (int k = 0; k < mid1; k++) {
+                ctxt1_mat[i][k].multiplyBy(ctxt3_mat[k][j]);
+                //ctxt1_mat[i][j].multiplyBy2(ctxt2_mat[i][j], ctxt3_mat[i][j]);
+            }
+        }
+    }
+
+    return ctxt1_mat;
 
 }
 
-vector<vector<int>> Decrypt(long m, long p, long r, long L, long c, long w, int rows, int cols, vector<vector<Ctxt>> ctxt_mat, int phim) {
+//vector<vector<int>> Decrypt(long m, long p, long r, long L, long c, long w, int rows, int cols, vector<vector<Ctxt>> ctxt_mat, int phim) {
+vector<vector<int>> Decrypt(FHESecKey secretKey, int rows, int cols, vector<vector<Ctxt>> ctxt_mat, int phim) {
 
-    FHEcontext context(m, p, r);
-    buildModChain(context, L, c);
-    FHESecKey secretKey(context);
-    FHEPubKey &publicKey = secretKey;
-    secretKey.GenSecKey(w);
+//    FHEcontext context(m, p, r);
+//    buildModChain(context, L, c);
+//    FHESecKey secretKey(context);
+//    FHEPubKey &publicKey = secretKey;
+//    secretKey.GenSecKey(w);
 
     ZZX temp_store_zzx;
     vector<vector<int>> vvint;
@@ -307,6 +356,30 @@ vector<vector<int>> Decrypt(long m, long p, long r, long L, long c, long w, int 
     }
 
     return vvint;
+
+// Decrypt and Decode.
+
+//    ZZX temp_store_zzx;
+//    vector<vector<int>> vvint;
+
+//    for (int i = 0; i < rows; i++) {
+//        for (int j = 0; j < cols; j++) {
+//            // Decrypt each polynomial and store it in temp_store_zzx.
+//            secretKey.Decrypt(temp_store_zzx, ctxt_mat[i][j]);
+//            cout << "zzx: " << temp_store_zzx << endl;
+//            vector<int> vec_int;
+//            int integer;
+//            for (int k = 0; k < phim; k++) {
+//                // Convert each zz in temp_store_zzx into integer.
+//                conv(integer, temp_store_zzx[k]);
+//                vec_int.push_back(integer);
+//            }
+//            vvint.push_back(vec_int);
+//        }
+//    }
+//
+//    return vvint;
+
 
 }
 
@@ -343,7 +416,7 @@ vector<vector<double>> Decode(int rows, int cols, vector<vector<int>> matrix, in
                     // -x^(n-i) --> x^i
                     result1 += (-1*storage[i][j][k]) * pow(2, k - phim);
                 }
-                    // Integer part.
+                // Integer part.
                 else {
                     result2 += storage[i][j][k] * pow(2, k);
                 }
@@ -445,100 +518,9 @@ vector<vector<ZZX>> frac_to_ZZX(int rows, int cols, vector<vector<double>> mat, 
 
 
 
+
+
 /*
-vector<vector<double>> Y() {
-
-    int x, y;
-
-    ifstream myfile;
-    myfile.open("/home/karis/CLionProjects/HElib-basic/matrix.txt");
-
-    // Tests if the file opens successfully.
-    if (!myfile.is_open()) {
-        cout << "File failed to open!" << endl;
-    }
-
-    myfile >> x;
-    myfile >> y;
-
-    vector<vector<double>> mat1;
-
-    mat1.resize(x);
-    for (int i = 0; i < mat1.size(); i++) {
-        mat1[i].resize(y);
-    }
-
-    vector<vector<double>> mat2;
-
-    mat2.resize(x);
-    for (int i = 0; i < mat2.size(); i++) {
-        mat2[i].resize(1);
-    }
-
-    cout << "This is the matrix Y: ";
-    for (int i = 0; i < x; i++) {
-        mat1[i][0] = 1;
-        for (int j = 1; j < y; j++) {
-            myfile >> mat1[i][j];
-        }
-        myfile >> mat2[i][0];
-    }
-
-    return mat2;
-
-}
-
-vector<vector<double>> Xtrans_X() {
-
-    int x, y;
-
-    ifstream myfile;
-    myfile.open("/home/karis/CLionProjects/HElib-basic/matrix.txt");
-
-    // Tests if the file opens successfully.
-    if (!myfile.is_open()) {
-        cout << "File failed to open!" << endl;
-    }
-
-    myfile >> x;
-    myfile >> y;
-
-    vector<vector<double>> mat1;
-
-    mat1.resize(x);
-    for (int i = 0; i < mat1.size(); i++) {
-        mat1[i].resize(y);
-    }
-
-    vector<vector<double>> mat2;
-
-    mat2.resize(x);
-    for (int i = 0; i < mat2.size(); i++) {
-        mat2[i].resize(1);
-    }
-
-    for (int i = 0; i < x; i++) {
-        mat1[i][0] = 1;
-        for (int j = 1; j < y; j++) {
-            myfile >> mat1[i][j];
-        }
-        myfile >> mat2[i][0];
-    }
-
-    cout << "This is the matrix X: " << mat1 << endl;
-//    cout << "This is the matrix Y: " << mat2 << endl;
-
-    vector<vector<double>> mat1_trans;
-    mat1_trans = matrix_transpose(mat1);
-    cout << "This is X transpose: " << mat1_trans << endl;
-
-    vector<vector<double>> product;
-    product = dotprod(mat1_trans, mat1, x, y);
-    cout << "This is Xtrans_X: ";
-    return product;
-
-}
-
 // Integers to ZZX in matrix.
 vector<vector<ZZX>> int_to_ZZX(int x, int v, vector<vector<double>> product) {
 
