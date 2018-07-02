@@ -165,15 +165,18 @@ ZZX encode(int z) {
 //
 //}
 
-vector<vector<double>> Frac_Part(vector<vector<double>> mat, int rows, int cols) {
+vector<vector<double>> Frac_Part(vector<vector<double>> mat) {
 
     vector<vector<double>> inv_dec;
 
     inv_dec = mat;
 
+    int matrow = mat.size();
+    int matcol = mat[0].size();
+
     // The remaining decimal value: initial value - integer.
-    for (int i = 0; i < rows; i++) {
-        for (int j = 0; j < cols; j++) {
+    for (int i = 0; i < matrow; i++) {
+        for (int j = 0; j < matcol; j++) {
             inv_dec[i][j] = inv_dec[i][j] - trunc(inv_dec[i][j]);
         }
     }
@@ -183,14 +186,17 @@ vector<vector<double>> Frac_Part(vector<vector<double>> mat, int rows, int cols)
 
 }
 
-vector<vector<double>> Int_Part (vector<vector<double>> mat, int rows, int cols) {
+vector<vector<double>> Int_Part (vector<vector<double>> mat) {
 
     vector<vector<double>> inv_int;
 
     inv_int = mat;
 
-    for (int i = 0; i < rows; i++) {
-        for (int j = 0; j < cols; j++) {
+    int matrow = mat.size();
+    int matcol = mat[0].size();
+
+    for (int i = 0; i < matrow; i++) {
+        for (int j = 0; j < matcol; j++) {
             inv_int[i][j] = trunc(mat[i][j]);
             if (inv_int[i][j] == -0) {
                 inv_int[i][j] = 0;
@@ -205,7 +211,7 @@ vector<vector<double>> Int_Part (vector<vector<double>> mat, int rows, int cols)
 }
 
 //vector<vector<Ctxt>> Encrypt(long m, long p, long r, long L, long c, long w, int rows, int cols, vector<vector<ZZX>> matrix) {
-vector<vector<Ctxt>> Encrypt(FHESecKey secretKey, long w, int rows, int cols, vector<vector<ZZX>> matrix) {
+vector<vector<Ctxt>> Encrypt(FHEPubKey publicKey, long w, vector<vector<ZZX>> matrix) {
 
     cout << "-------------------- Encryption --------------------" << endl;
     auto begin_encrypt = Clock::now();
@@ -213,18 +219,21 @@ vector<vector<Ctxt>> Encrypt(FHESecKey secretKey, long w, int rows, int cols, ve
 //    FHEcontext context(m, p, r);
 //    buildModChain(context, L, c);
 //    FHESecKey secretKey(context);
-    FHEPubKey &publicKey = secretKey;
-    secretKey.GenSecKey(w);
+//    FHEPubKey &publicKey = secretKey;
+//    secretKey.GenSecKey(w);
 
     // Encrypt for all ZZX in mat
-    Ctxt enc(publicKey);
+
+
+    int matrow = matrix.size();
+    int matcol = matrix[0].size();
+
+
     vector<vector<Ctxt>> ctxt_mat;
-
-    vector<Ctxt> temp_ctxt;
-
-    for (int i = 0; i < rows; i++) {
+    for (int i = 0; i < matrow; i++) {
         vector<Ctxt> temp_ctxt;
-        for (int j = 0; j < cols; j++) {
+        for (int j = 0; j < matcol; j++) {
+            Ctxt enc(publicKey);
             publicKey.Encrypt(enc, matrix[i][j]);
             temp_ctxt.push_back(enc);
         }
@@ -331,7 +340,7 @@ vector<vector<Ctxt>> Encrypt_Multiplication(FHESecKey secretKey, long w, int mid
 }
 
 //vector<vector<int>> Decrypt(long m, long p, long r, long L, long c, long w, int rows, int cols, vector<vector<Ctxt>> ctxt_mat, int phim) {
-vector<vector<int>> Decrypt(FHESecKey secretKey, int rows, int cols, vector<vector<Ctxt>> ctxt_mat, int phim) {
+vector<vector<int>> Decrypt(FHESecKey secretKey, vector<vector<Ctxt>> ctxt_mat, int phim) {
 
 //    FHEcontext context(m, p, r);
 //    buildModChain(context, L, c);
@@ -342,8 +351,11 @@ vector<vector<int>> Decrypt(FHESecKey secretKey, int rows, int cols, vector<vect
     ZZX temp_store_zzx;
     vector<vector<int>> vvint;
 
-    for (int i = 0; i < rows; i++) {
-        for (int j = 0; j < cols; j++) {
+    int ctxtmat_row = ctxt_mat.size();
+    int ctxtmat_col = ctxt_mat[0].size();
+
+    for (int i = 0; i < ctxtmat_row; i++) {
+        for (int j = 0; j < ctxtmat_col; j++) {
             // Decrypt each polynomial and store it in temp_store_zzx.
             secretKey.Decrypt(temp_store_zzx, ctxt_mat[i][j]);
             cout << "zzx: " << temp_store_zzx << endl;
@@ -386,18 +398,21 @@ vector<vector<int>> Decrypt(FHESecKey secretKey, int rows, int cols, vector<vect
 
 }
 
-vector<vector<double>> Decode(int rows, int cols, vector<vector<int>> matrix, int phim) {
+vector<vector<double>> Decode(vector<vector<int>> matrix, int phim) {
 
     vector<vector<vector<int>>> storage;
 
-    storage.resize(rows);
+    int matrow = matrix.size();
+    int matcol = matrix[0].size();
+
+    storage.resize(matrow);
     for (int i = 0; i < storage.size(); i++) {
-        storage[i].resize(cols);
+        storage[i].resize(matcol);
     }
 
     int index = 0;
-    for (int i = 0; i < rows; i++) {
-        for (int j = 0; j < cols; j++) {
+    for (int i = 0; i < matrow; i++) {
+        for (int j = 0; j < matcol; j++) {
             storage[i][j] = matrix[index++];
         }
     }
@@ -408,8 +423,8 @@ vector<vector<double>> Decode(int rows, int cols, vector<vector<int>> matrix, in
     // Initialize sum of fractional part and sum of int part to be 0.
     double result1 = 0;
     double result2 = 0;
-    for (int i = 0; i < rows; i++) {
-        for (int j = 0; j < cols; j++) {
+    for (int i = 0; i < matrow; i++) {
+        for (int j = 0; j < matcol; j++) {
             for (int k = 0; k < phim; k++) {
                 // Fractional part.
                 if (k > phim / 2) {
@@ -432,14 +447,14 @@ vector<vector<double>> Decode(int rows, int cols, vector<vector<int>> matrix, in
         }
     }
 
-    result_vvec.resize(rows);
+    result_vvec.resize(matrow);
     for (int i = 0; i < result_vvec.size(); i++) {
-        result_vvec[i].resize(cols);
+        result_vvec[i].resize(matcol);
     }
 
     int index1 = 0;
-    for (int i = 0; i < rows; i++) {
-        for (int j = 0; j < cols; j++) {
+    for (int i = 0; i < matrow; i++) {
+        for (int j = 0; j < matcol; j++) {
             result_vvec[i][j] = result_vec[index1++];
         }
     }
@@ -457,6 +472,7 @@ ZZX frac_encoder(double z, int cols, int phim) {
     ZZX ptxt;
     vector<double> temp;
     double frac_pt;
+
 
     while (frac_pt != 0) {
         double store = z * 2;
@@ -482,23 +498,26 @@ ZZX frac_encoder(double z, int cols, int phim) {
 }
 
 // Adding the int part tgt with the frac part.
-vector<vector<ZZX>> frac_to_ZZX(int rows, int cols, vector<vector<double>> mat, vector<vector<double>> dec, int phim) {
+vector<vector<ZZX>> frac_to_ZZX(vector<vector<double>> mat, vector<vector<double>> dec, int phim) {
 
     ZZX msg1;
     ZZX msg2;
     ZZX int_and_frac;
     vector<vector<ZZX>> polyn;
 
+    int matrow = mat.size();
+    int matcol = mat[0].size();
+
     //cout << "fraction to ZZX: " << endl;
-    for (int i = 0; i < rows; i++) {
+    for (int i = 0; i < matrow; i++) {
         vector<ZZX> tempp;
-        for (int j = 0; j < cols; j++) {
+        for (int j = 0; j < matcol; j++) {
             double z1 = mat[i][j];
             // Int part --> ZZX.
             msg1 = encode(z1);
             double z2 = dec[i][j];
             // Fractional part --> ZZX.
-            msg2 = frac_encoder(z2, cols, phim);
+            msg2 = frac_encoder(z2, matcol, phim);
             // Adding the int and fractional parts tgt.
             int_and_frac = msg1 + msg2;
             tempp.push_back(int_and_frac);
@@ -570,3 +589,20 @@ vector<vector<ZZX>> frac_to_binary(int rows, int cols, vector<vector<double>> de
     return binary;
 
 }*/
+
+
+vector<vector<Ctxt>> test(FHEPubKey publicKey, vector<vector<ZZX>> matrix)
+{
+    vector<vector<Ctxt>> ctxt_mat;
+    for (int i = 0; i < matrix.size(); i++) {
+        vector<Ctxt> temp_ctxt;
+        for (int j = 0; j < matrix[0].size(); j++) {
+            Ctxt tmp(publicKey);
+            publicKey.Encrypt(tmp, matrix[i][j]);
+            temp_ctxt.push_back(tmp);
+        }
+        ctxt_mat.push_back(temp_ctxt);
+    }
+
+    return ctxt_mat;
+}

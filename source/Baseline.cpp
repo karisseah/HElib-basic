@@ -29,14 +29,14 @@ int main() {
     long p = 17;                                        // Plaintext base
     long r = 1;                                         // Lifting
     long L = 10;                                         // Number of levels in the modulus chain
-    long c = 1;                                         // Number of columns in key-switching matrix
+    long c = 2;                                         // Number of columns in key-switching matrix
     long w = 2;                                         // Hamming weight of secret key
     long d = 1;                                         // Degree of the field extension
     long k = 80;                                        // Security parameter
     long s = 2;                                         // Minimum number of slots
 
     // Finding m
-    //m = FindM(k, L, c, p, d, s, 0);                     // Find a value for m given the params
+//    m = FindM(k, L, c, p, d, s, 0);                     // Find a value for m given the params
     cout << "m = " << m << endl;
 
     // Initializing context
@@ -52,8 +52,8 @@ int main() {
     FHESecKey secretKey(context);                       // Construct a secret key structure
     FHEPubKey &publicKey = secretKey;                   // An "upcast": FHESecKey is a subclass of FHEPubKey - Creates publicKey from secretKey
     secretKey.GenSecKey(w);                             // Generate a secret key with Hamming weight w
-	addSome1DMatrices(secretKey);                       // apparently for key switching
-	//addFrbMatrices(secretKey);                          // for Ctxt rotate
+    addSome1DMatrices(secretKey);                       // apparently for key switching
+//	addFrbMatrices(secretKey);                          // for Ctxt rotate
 
     // Helper Class for encryption and decryption
     EncryptedArray ea(context, G);                      // Construct EncryptedArray object ea, associated with context and G
@@ -110,18 +110,18 @@ int main() {
     cout << "X transpose: " << mat_trans << endl;
 
     // Product of X transpose and X.
-    vector<vector<double>> product = dotprod(mat_trans, mat1, y, y, x);
+    vector<vector<double>> product = dotprod(mat_trans, mat1);
     cout << "Xtrans_X: " << product << endl;
 
     // XtransX_Inv.
-    vector<vector<double>> XtransX_Inv = Inv(y, product);
+    vector<vector<double>> XtransX_Inv = Inv(product);
     cout << "Inverse matrix of Xtrans_X is: " << XtransX_Inv << endl;
 
     // XtransX_Inv * Xtrans.
-    vector<vector<double>> XtransXInv_Xtrans = dotprod(XtransX_Inv, mat_trans, y, x, y);
+    vector<vector<double>> XtransXInv_Xtrans = dotprod(XtransX_Inv, mat_trans);
 
     // XtransX_Inv * Xtrans * Y.
-    vector<vector<double>> matrix = dotprod(XtransXInv_Xtrans, mat2, y, 1, x);
+    vector<vector<double>> matrix = dotprod(XtransXInv_Xtrans, mat2);
     cout << "This is the product matrix: " << matrix << '\n' << endl;
 
 //    cout << "-------------------- Encryption --------------------" << endl;
@@ -137,15 +137,15 @@ int main() {
     cout << "This is the decimal matrix: " << XtransX_Inv << endl;
 
     // Fractional part.
-    vector<vector<double>> inv_dec = Frac_Part(XtransX_Inv, y, y);
+    vector<vector<double>> inv_dec = Frac_Part(XtransX_Inv);
     cout << inv_dec << endl;
 
     // Integer part.
-    vector<vector<double>> inv_int = Int_Part (XtransX_Inv, y, y);
+    vector<vector<double>> inv_int = Int_Part (XtransX_Inv);
     cout << inv_int << endl;
 
     // Encode: Conversion of fractions (int part + dec part) to ZZX.
-    vector<vector<ZZX>> inv_matrix = frac_to_ZZX(y, y, inv_int, inv_dec, phim);
+    vector<vector<ZZX>> inv_matrix = frac_to_ZZX(inv_int, inv_dec, phim);
     cout << "encode: " << inv_matrix << '\n' << endl;
 
     // Encrypt.
@@ -166,19 +166,19 @@ int main() {
 */
     // FOR Xtrans.
 
-    cout << "FOR X: " << endl;
+    cout << "FOR X TRANSPOSE: " << endl;
     cout << "This is the decimal matrix: " << mat_trans << endl;
 
     // Fractional part.
-    vector<vector<double>> x_dec = Frac_Part(mat_trans, y, x);
+    vector<vector<double>> x_dec = Frac_Part(mat_trans);
     cout << x_dec << endl;
 
     // Integer part.
-    vector<vector<double>> x_int = Int_Part (mat_trans, y, x);
+    vector<vector<double>> x_int = Int_Part (mat_trans);
     cout << x_int << endl;
 
     // Encode: Conversion of fractions (int part + dec part) to ZZX.
-    vector<vector<ZZX>> x_matrix = frac_to_ZZX(y, x, x_int, x_dec, phim);
+    vector<vector<ZZX>> x_matrix = frac_to_ZZX(x_int, x_dec, phim);
     cout << "encode: " << x_matrix << '\n' << endl;
 
 /*    // Encrypt and Decrypt.
@@ -195,15 +195,15 @@ int main() {
     cout << "This is the decimal matrix: " << mat2 << endl;
 
     // Fractional part.
-    vector<vector<double>> y_dec = Frac_Part(mat2, x, 1);
+    vector<vector<double>> y_dec = Frac_Part(mat2);
     cout << y_dec << endl;
 
     // Integer part.
-    vector<vector<double>> y_int = Int_Part(mat2, x, 1);
+    vector<vector<double>> y_int = Int_Part(mat2);
     cout << y_int << endl;
 
     // Encode: Conversion of fractions (int part + dec part) to ZZX.
-    vector<vector<ZZX>> y_matrix = frac_to_ZZX(x, 1, y_int, y_dec, phim);
+    vector<vector<ZZX>> y_matrix = frac_to_ZZX(y_int, y_dec, phim);
     cout << "encode: " << y_matrix << '\n' << endl;
 
     // Encrypt and Decrypt.
@@ -211,18 +211,87 @@ int main() {
     cout << "encrypt and decrypt: " << y_enc_decrypt << endl;
 
     // Decode.
-    vector<vector<double>> y_decode = Decode(x, 1, y_enc_decrypt, phim);
+    vector<vector<double>> y_decode = Decode(y_enc_decrypt, phim);
     cout << "decode: " << y_decode << '\n' << endl;
 */
-    // Multiplication of enc(XtransX_Inv), enc(Xtrans) and enc(Y).
-    vector<vector<Ctxt>> inv_enc = Encrypt(secretKey, w, y, y, inv_matrix);
-//    cout << inv_enc << '\n' << endl;
-    vector<vector<Ctxt>> x_enc = Encrypt(secretKey, w, y, x, x_matrix);
-//    cout << x_enc << '\n' << endl;
-    vector<vector<Ctxt>> y_enc = Encrypt(secretKey, w, x, 1, y_matrix);
-//    cout << y_enc << '\n' << endl;
+//    // Multiplication of enc(XtransX_Inv), enc(Xtrans) and enc(Y).
+//    vector<vector<Ctxt>> inv_enc = Encrypt(publicKey, w, inv_matrix);
+////    cout << inv_enc << '\n' << endl;
+//    vector<vector<Ctxt>> xtrans_enc = Encrypt(publicKey, w, x_matrix);
+////    cout << x_enc << '\n' << endl;
+//    vector<vector<Ctxt>> y_enc = Encrypt(publicKey, w, y_matrix);
+////    cout << y_enc << '\n' << endl;
 
-    cout << inv_enc.size() << " " << inv_enc[0].size() << endl;
+
+//    cout << inv_enc.size() << endl;
+//    cout << inv_enc[0].size() << endl;
+////
+//    cout << xtrans_enc.size() << endl;
+//    cout << xtrans_enc[0].size() << endl;
+//
+//    cout << y_enc.size() << endl;
+//    cout << y_enc[0].size() << endl;
+
+    cout << "-------------------- Encryption --------------------" << endl;
+    ZZX msg;
+    SetCoeff(msg,1,1);
+    cout << msg << endl;
+
+    Ctxt enc(publicKey),enc2(publicKey);
+    publicKey.Encrypt(enc, msg);
+    publicKey.Encrypt(enc2, msg);
+    cout << "-------------------- Operation --------------------" << endl;
+    vector<Ctxt> vec;
+    vec.push_back(enc);
+    vec.push_back(enc2);
+    vec[0].multiplyBy(vec[1]);
+
+    vector<vector<Ctxt>> inv_enc;
+    for (int i = 0; i < inv_matrix.size(); i++) {
+        vector<Ctxt> temp_ctxt;
+        for (int j = 0; j < inv_matrix[0].size(); j++) {
+            Ctxt tmp(publicKey);
+            publicKey.Encrypt(tmp, inv_matrix[i][j]);
+            temp_ctxt.push_back(tmp);
+        }
+        inv_enc.push_back(temp_ctxt);
+    }
+
+    vector<vector<Ctxt>> xtrans_enc;
+    for (int i = 0; i < x_matrix.size(); i++) {
+        vector<Ctxt> temp_ctxt;
+        for (int j = 0; j < x_matrix[0].size(); j++) {
+            Ctxt tmp(publicKey);
+            publicKey.Encrypt(tmp, x_matrix[i][j]);
+            temp_ctxt.push_back(tmp);
+        }
+        xtrans_enc.push_back(temp_ctxt);
+    }
+
+    vector<vector<Ctxt>> y_enc;
+    for (int i = 0; i < y_matrix.size(); i++) {
+        vector<Ctxt> temp_ctxt;
+        for (int j = 0; j < y_matrix[0].size(); j++) {
+            Ctxt tmp(publicKey);
+            publicKey.Encrypt(tmp, y_matrix[i][j]);
+            temp_ctxt.push_back(tmp);
+        }
+        y_enc.push_back(temp_ctxt);
+    }
+
+    cout << "-------------------- Decryption --------------------" << endl;
+    ZZX ans;
+    secretKey.Decrypt(ans, enc);
+    cout << "Plaintext:  " << ans << endl;
+
+    cout << mat_mat_mult(inv_enc, xtrans_enc, y_enc) << endl;
+
+
+
+
+
+
+/*    cout << inv_enc.size() << " " << inv_enc[0].size() << endl;
     cout << x_enc.size() << " " << x_enc[0].size() << endl;
     cout << "Ciphertext after multiplication:" << endl;
     for (int i = 0; i < inv_enc.size(); i++) {
@@ -248,9 +317,8 @@ int main() {
     }
 
         cout << "This is after mult: " << inv_enc << endl;
+*/
 
-
-    //cout << '\n' << "This is after multiplying: " << '\n' << Encrypt_Multiplication(secretKey, w, y, x, y, x, inv_matrix, x_matrix, y_matrix) << endl;
 
 
 
