@@ -14,7 +14,7 @@ using namespace NTL;
 vector<vector<double>> matrix_transpose(vector<vector<double>> product);
 vector<vector<double>> dotprod(vector<vector<double>> mat1, vector<vector<double>> mat2);
 vector<vector<double>> Inv(vector<vector<double>> product);
-vector<vector<Ctxt>> mat_mat_mult(vector<vector<Ctxt>> mat1, vector<vector<Ctxt>> mat2, vector<vector<Ctxt>> mat3);
-//vector<vector<Ctxt>> mat_vec_mult(vector<vector<Ctxt>> mat1, vector<vector<Ctxt>> mat2);
+vector<vector<Ctxt>> mat_mat_mult(vector<vector<Ctxt>> mat1, vector<vector<Ctxt>> mat2);
+vector<vector<Ctxt>> mat_vec_mult(vector<vector<Ctxt>> mat1, vector<vector<Ctxt>> mat2);
 
 #endif //HELIB_BASIC_MATRIXUTILITY_H

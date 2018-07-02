@@ -102,41 +102,63 @@ vector<vector<double>> Inv(vector<vector<double>> mult) {
 
 }
 
-vector<vector<Ctxt>> mat_mat_mult(vector<vector<Ctxt>> mat1, vector<vector<Ctxt>> mat2, vector<vector<Ctxt>> mat3) {
+vector<vector<Ctxt>> mat_mat_mult(vector<vector<Ctxt>> mat1, vector<vector<Ctxt>> mat2) {
 
     int mat1row = mat1.size();
 
     int mat2row = mat2.size();
     int mat2col = mat2[0].size();
 
-    int mat3col = mat3[0].size();
+    // Once resized, errors.
+    vector<vector<Ctxt>> mat;
+    mat.resize(mat1row);
+    for (int i = 0; i < mat1row; i++) {
+        mat[i].resize(mat2col);
+    }
 
-    mat1[0][0].multiplyBy(mat2[0][0]);
-
-//    cout << "Ciphertext after multiplication:" << endl;
-//    for (int i = 0; i < mat1row; i++) {
-//        cout << "1st loop i = " << i << endl;
-//        for (int j = 0; j < mat2col; j++) {
-//            cout << "1st loop j = " << j << endl;
-//            for (int k = 0; k < mat2row; k++) {
-//                cout << "1st loop k = " << k << endl;
+    cout << "Ciphertext after multiplication:" << endl;
+    for (int i = 0; i < mat1row; i++) {
+        cout << "1st loop i = " << i << endl;
+        for (int j = 0; j < mat2col; j++) {
+            cout << "1st loop j = " << j << endl;
+            for (int k = 0; k < mat2row; k++) {
+                cout << "1st loop k = " << k << endl;
 //                mat1[i][k] *= (mat2[k][j]);
-//                mat1[i][k].multiplyBy(mat2[k][j]);
+                mat1[i][k].multiplyBy(mat2[k][j]);
+                cout << mat1[i][k] << endl;
+                mat[i][j] = mat1[i][k];
 //                mat1[i][k].reLinearize(-1);
-//                //ctxt1_mat[i][j].multiplyBy2(ctxt2_mat[i][j], ctxt3_mat[i][j]);
-//                cout << "finish mult1" << endl;
-//            }
+                cout << "finish mult1" << endl;
+            }
+        }
+    }
+
+//    for (int i = 0; i < mat1row; i++) {
+//        for (int j = 0; j < mat2col; j++) {
+//            mat[i][j] = mat1[i][j];
 //        }
 //    }
 
+    return mat2;
+
+}
+
+vector<vector<Ctxt>> mat_vec_mult(vector<vector<Ctxt>> mat1, vector<vector<Ctxt>> mat2) {
+
+    int mat1row = mat1.size();
+
+    int mat2row = mat2.size();
+    int mat2col = 1;
+
     for (int i = 0; i < mat1row; i++) {
-        cout << "i = " << i << endl;
-        for (int j = 0; j < mat3col; j++) {
-            cout << "j = " << j << endl;
-            for (int k = 0; k < mat2col; k++) {
-                cout << "k = " << k << endl;
-//                mat1[i][k].multiplyBy(mat3[k][j]);
-                //ctxt1_mat[i][j].multiplyBy2(ctxt2_mat[i][j], ctxt3_mat[i][j]);
+        cout << "2nd loop i = " << i << endl;
+        for (int j = 0; j < mat2col; j++) {
+            cout << "2nd loop j = " << j << endl;
+            for (int k = 0; k < mat2row; k++) {
+                cout << "2nd loop k = " << k << endl;
+//                mat1[i][k] *= (mat2[k][j]);
+                mat1[i][k].multiplyBy(mat2[k][j]);
+//                mat1[i][k].reLinearize(-1);
                 cout << "finish mult2" << endl;
             }
         }

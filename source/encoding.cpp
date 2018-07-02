@@ -358,12 +358,12 @@ vector<vector<int>> Decrypt(FHESecKey secretKey, vector<vector<Ctxt>> ctxt_mat, 
         for (int j = 0; j < ctxtmat_col; j++) {
             // Decrypt each polynomial and store it in temp_store_zzx.
             secretKey.Decrypt(temp_store_zzx, ctxt_mat[i][j]);
-            cout << "zzx: " << temp_store_zzx << endl;
             vector<int> vec_int;
             int integer;
             for (int k = 0; k < phim; k++) {
                 // Convert each zz in temp_store_zzx into integer.
                 conv(integer, temp_store_zzx[k]);
+
                 vec_int.push_back(integer);
             }
             vvint.push_back(vec_int);
@@ -398,7 +398,7 @@ vector<vector<int>> Decrypt(FHESecKey secretKey, vector<vector<Ctxt>> ctxt_mat, 
 
 }
 
-vector<vector<double>> Decode(vector<vector<int>> matrix, int phim) {
+vector<vector<double>> Decode(vector<vector<int>> matrix, int phim, long p) {
 
     vector<vector<vector<int>>> storage;
 
@@ -428,8 +428,8 @@ vector<vector<double>> Decode(vector<vector<int>> matrix, int phim) {
             for (int k = 0; k < phim; k++) {
                 // Fractional part.
                 if (k > phim / 2) {
-                    if (storage[i][j][k] == 16) {
-                        storage[i][j][k] = -1;
+                    if (storage[i][j][k] > floor(p/2)) {
+                        storage[i][j][k] = storage[i][j][k] - p;
                     }
                     // -x^(n-i) --> x^i
                     result1 += (-1*storage[i][j][k]) * pow(2, k - phim);
@@ -590,19 +590,3 @@ vector<vector<ZZX>> frac_to_binary(int rows, int cols, vector<vector<double>> de
 
 }*/
 
-
-vector<vector<Ctxt>> test(FHEPubKey publicKey, vector<vector<ZZX>> matrix)
-{
-    vector<vector<Ctxt>> ctxt_mat;
-    for (int i = 0; i < matrix.size(); i++) {
-        vector<Ctxt> temp_ctxt;
-        for (int j = 0; j < matrix[0].size(); j++) {
-            Ctxt tmp(publicKey);
-            publicKey.Encrypt(tmp, matrix[i][j]);
-            temp_ctxt.push_back(tmp);
-        }
-        ctxt_mat.push_back(temp_ctxt);
-    }
-
-    return ctxt_mat;
-}
