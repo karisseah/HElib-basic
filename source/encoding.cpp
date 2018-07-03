@@ -340,7 +340,7 @@ vector<vector<Ctxt>> Encrypt_Multiplication(FHESecKey secretKey, long w, int mid
 }
 
 //vector<vector<int>> Decrypt(long m, long p, long r, long L, long c, long w, int rows, int cols, vector<vector<Ctxt>> ctxt_mat, int phim) {
-vector<vector<int>> Decrypt(FHESecKey secretKey, vector<vector<Ctxt>> ctxt_mat, int phim) {
+vector<vector<int>> Decrypt(FHESecKey& secretKey, vector<vector<Ctxt>> ctxt_mat, int phim) {
 
 //    FHEcontext context(m, p, r);
 //    buildModChain(context, L, c);
@@ -398,24 +398,81 @@ vector<vector<int>> Decrypt(FHESecKey secretKey, vector<vector<Ctxt>> ctxt_mat, 
 
 }
 
-vector<vector<double>> Decode(vector<vector<int>> matrix, int phim, long p) {
+//vector<vector<double>> Decode(vector<vector<int>> matrix, int phim, long p) {
+//
+//    int matrow = matrix.size();
+//    int matcol = matrix[0].size();
+//
+//    vector<vector<vector<int>>> storage(matrow, vector<vector<int>>(matcol, vector<int>(phim)));
+//
+////    storage.resize(matrow);
+////    for (int i = 0; i < storage.size(); i++) {
+////        storage[i].resize(matcol);
+////    }
+//
+//    cout << storage << endl;
+//
+//    int index = 0;
+//    for (int i = 0; i < matrow; i++) {
+//        for (int j = 0; j < matcol; j++) {
+//            storage[i][j] = matrix[index++];
+//        }
+//        // cant exit this above loop
+//    }
+//
+//    vector<double> result_vec;
+//    vector<vector<double>> result_vvec;
+//
+//    // Initialize sum of fractional part and sum of int part to be 0.
+//    double result1 = 0;
+//    double result2 = 0;
+//    for (int i = 0; i < matrow; i++) {
+//        for (int j = 0; j < matcol; j++) {
+//            for (int k = 0; k < phim; k++) {
+//                // Fractional part.
+//                if (k > phim / 2) {
+//                    if (storage[i][j][k] > floor(p/2)) {
+//                        storage[i][j][k] = storage[i][j][k] - p;
+//                    }
+//                    // -x^(n-i) --> x^i
+//                    result1 += (-1*storage[i][j][k]) * pow(2, k - phim);
+//                }
+//                // Integer part.
+//                else {
+//                    result2 += storage[i][j][k] * pow(2, k);
+//                }
+//            }
+//            double final = result1 + result2;
+//            result_vec.push_back(final);
+//            // Reset the sum to be 0 for the next iteration.
+//            result1 = 0;
+//            result2 = 0;
+//        }
+//    }
+//
+//    result_vvec.resize(matrow);
+//    for (int i = 0; i < result_vvec.size(); i++) {
+//        result_vvec[i].resize(matcol);
+//    }
+//
+//    int index1 = 0;
+//    for (int i = 0; i < matrow; i++) {
+//        for (int j = 0; j < matcol; j++) {
+//            result_vvec[i][j] = result_vec[index1++];
+//        }
+//    }
+//
+////    cout << "-------------------- Decryption --------------------" << endl;
+//    cout << "Plaintext:  ";
+//
+//    return result_vvec;
+//
+//}
 
-    vector<vector<vector<int>>> storage;
+vector<vector<double>> Decode(vector<vector<int>> matrix, int phim, long p) {
 
     int matrow = matrix.size();
     int matcol = matrix[0].size();
-
-    storage.resize(matrow);
-    for (int i = 0; i < storage.size(); i++) {
-        storage[i].resize(matcol);
-    }
-
-    int index = 0;
-    for (int i = 0; i < matrow; i++) {
-        for (int j = 0; j < matcol; j++) {
-            storage[i][j] = matrix[index++];
-        }
-    }
 
     vector<double> result_vec;
     vector<vector<double>> result_vvec;
@@ -424,42 +481,43 @@ vector<vector<double>> Decode(vector<vector<int>> matrix, int phim, long p) {
     double result1 = 0;
     double result2 = 0;
     for (int i = 0; i < matrow; i++) {
+        double final;
         for (int j = 0; j < matcol; j++) {
-            for (int k = 0; k < phim; k++) {
-                // Fractional part.
-                if (k > phim / 2) {
-                    if (storage[i][j][k] > floor(p/2)) {
-                        storage[i][j][k] = storage[i][j][k] - p;
-                    }
-                    // -x^(n-i) --> x^i
-                    result1 += (-1*storage[i][j][k]) * pow(2, k - phim);
+            // Fractional part.
+            if (j > phim / 2) {
+                if (matrix[i][j] > floor(p/2)) {
+                    matrix[i][j] = matrix[i][j] - p;
                 }
-                // Integer part.
-                else {
-                    result2 += storage[i][j][k] * pow(2, k);
-                }
+                // -x^(n-i) --> x^i
+                result1 += (-1*matrix[i][j]) * pow(2, j - phim);
             }
-            double final = result1 + result2;
-            result_vec.push_back(final);
+            // Integer part.
+            else {
+                result2 += matrix[i][j] * pow(2, j);
+            }
+            final = result1 + result2;
+            //result_vec.push_back(final);
             // Reset the sum to be 0 for the next iteration.
             result1 = 0;
             result2 = 0;
         }
+        result_vec.push_back(final);
     }
+    result_vvec.push_back(result_vec);
 
-    result_vvec.resize(matrow);
-    for (int i = 0; i < result_vvec.size(); i++) {
-        result_vvec[i].resize(matcol);
-    }
+//    result_vvec.resize(matrow);
+//    for (int i = 0; i < result_vvec.size(); i++) {
+//        result_vvec[i].resize(matcol);
+//    }
+//
+//    int index1 = 0;
+//    for (int i = 0; i < matrow; i++) {
+//        for (int j = 0; j < matcol; j++) {
+//            result_vvec[i][j] = result_vec[index1++];
+//        }
+//    }
 
-    int index1 = 0;
-    for (int i = 0; i < matrow; i++) {
-        for (int j = 0; j < matcol; j++) {
-            result_vvec[i][j] = result_vec[index1++];
-        }
-    }
-
-    cout << "-------------------- Decryption --------------------" << endl;
+//    cout << "-------------------- Decryption --------------------" << endl;
     cout << "Plaintext:  ";
 
     return result_vvec;

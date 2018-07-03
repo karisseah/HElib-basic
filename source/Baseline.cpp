@@ -174,7 +174,7 @@ int main() {
     cout << x_dec << endl;
 
     // Integer part.
-    vector<vector<double>> x_int = Int_Part (mat_trans);
+    vector<vector<double>> x_int = Int_Part(mat_trans);
     cout << x_int << endl;
 
     // Encode: Conversion of fractions (int part + dec part) to ZZX.
@@ -235,6 +235,7 @@ int main() {
     cout << "-------------------- Encryption --------------------" << endl;
     auto begin_encrypt = Clock::now();
 
+
     vector<vector<Ctxt>> inv_enc;
     for (int i = 0; i < inv_matrix.size(); i++) {
         vector<Ctxt> temp_ctxt;
@@ -268,10 +269,6 @@ int main() {
         y_enc.push_back(temp_ctxt);
     }
 
-    cout << inv_enc.size() << inv_enc[0].size() << endl;
-    cout << xtrans_enc.size() << xtrans_enc[0].size() << endl;
-    cout << y_enc.size() << y_enc[0].size() << endl;
-
     auto end_encrypt = Clock::now();
     cout << "Encryption Over!" << endl;
     cout << "It took: " << duration_cast<seconds>(end_encrypt - begin_encrypt).count() << " seconds." << '\n' << endl;
@@ -290,68 +287,33 @@ int main() {
 //    vec[0].multiplyBy(vec[1]);
 
     // 1st multiplication.
-    vector<vector<Ctxt>> ctxt_mat_temp = mat_mat_mult(inv_enc, xtrans_enc);
+    vector<vector<Ctxt>> ctxt_mat_temp = mat_mat_mult(inv_enc, xtrans_enc, publicKey);
 
-    cout << ctxt_mat_temp << endl;
-
-    cout << "inv rows: " << inv_enc.size() << " inv cols: " << inv_enc[0].size() << endl;
-    cout << "xtrans rows: " << xtrans_enc.size() << " xtrans cols: " << xtrans_enc[0].size() << endl;
-    //cout << "y rows: " << y_enc.size() << " y cols: " << y_enc[0].size() << endl;
-    cout << "rows: " << ctxt_mat_temp.size() << endl;
-    cout << "cols: " << ctxt_mat_temp[0].size() << endl;
+    //cout << ctxt_mat_temp << endl;
 
     // 2nd multiplication.
-    vector<vector<Ctxt>> ctxt_mat = mat_vec_mult(ctxt_mat_temp, y_enc);
-    cout << ctxt_mat << endl;
-
-    cout << "ctxt rows: " << ctxt_mat.size() << endl;
-    cout << "ctxt cols: " << ctxt_mat[0].size() << endl;
+    // ctxt for both places are the same?
+    vector<vector<Ctxt>> ctxt_mat = mat_mat_mult(ctxt_mat_temp, y_enc, publicKey);
 
     cout << "-------------------- Decryption --------------------" << endl;
     // Decrypt.
-//    vector<vector<int>> decrypt_mat = Decrypt(secretKey, ctxt_mat, phim);
-//    cout << decrypt_mat << endl;
+    vector<vector<int>> decrypt_mat = Decrypt(secretKey, ctxt_mat, phim);
+    cout << decrypt_mat << endl;
 
     // Decode.
 
 //    ZZX ans;
 //    secretKey.Decrypt(ans, enc);
 //    cout << "Plaintext:  " << ans << endl;
-    cout << "Plaintext:  " << endl;
+//    cout << "Plaintext:  " << endl;
 
-//    cout << Decode(decrypt_mat, phim, p) << endl;
+    cout << Decode(decrypt_mat, phim, p) << endl;
 
-
-
-
-
-/*    cout << inv_enc.size() << " " << inv_enc[0].size() << endl;
-    cout << x_enc.size() << " " << x_enc[0].size() << endl;
-    cout << "Ciphertext after multiplication:" << endl;
-    for (int i = 0; i < inv_enc.size(); i++) {
-        for (int j = 0; j < inv_enc[0].size(); j++) {
-            for (int k = 0; k < x_enc.size(); k++) {
-                cout << i << j << k << endl;
-                inv_enc[i][k].multiplyBy(x_enc[k][j]);
-                //ctxt1_mat[i][j].multiplyBy2(ctxt2_mat[i][j], ctxt3_mat[i][j]);
-                cout << "finish mult" << endl;
-            }
-        }
-    }
+    vector<vector<int>> decrypt_invmat = Decrypt(secretKey, y_enc, phim);
+    cout << Decode(decrypt_invmat, phim, p) << endl;
 
 
-    for (int i = 0; i < y; i++) {
-        for (int j = 0; j < 1; j++) {
-            for (int k = 0; k < x; k++) {
-//                inv_enc[i][k].multiplyBy(y_enc[k][j]);
-//                ctxt1_mat[i][j].multiplyBy2(ctxt2_mat[i][j], ctxt3_mat[i][j]);
-         cout << "finish mult2" << endl;
-            }
-        }
-    }
 
-        cout << "This is after mult: " << inv_enc << endl;
-*/
 
 
 
