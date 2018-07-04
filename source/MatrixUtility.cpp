@@ -102,22 +102,29 @@ vector<vector<double>> Inv(vector<vector<double>> mult) {
 
 }
 
-vector<vector<Ctxt>> mat_mat_mult(vector<vector<Ctxt>> mat1, vector<vector<Ctxt>> mat2, FHEPubKey& publicKey) {
+vector<vector<Ctxt>> mat_mat_mult(vector<vector<Ctxt>> mat1, vector<vector<Ctxt>> mat2, FHEPubKey& publicKey, FHESecKey& secretKey) {
 
     int mat1row = mat1.size();
 
     int mat2row = mat2.size();
     int mat2col = mat2[0].size();
 
-    vector<Ctxt> temp_mat;
+
     vector<vector<Ctxt>> mat;
 
     //cout << "Ciphertext after multiplication:" << endl;
     for (int i = 0; i < mat1row; i++) {
+        cout << "i: " << i << endl;
+        vector<Ctxt> temp_mat;
+
         for (int j = 0; j < mat2col; j++) {
+            cout << "j: " << j << endl;
+
             //Initialise runsum with pk.
             Ctxt runsum(publicKey);
             for (int k = 0; k < mat2row; k++) {
+                cout << "k: " << k << endl;
+
                 Ctxt temp = mat1[i][k];
                 temp.multiplyBy(mat2[k][j]);
                 // runsum
@@ -126,10 +133,16 @@ vector<vector<Ctxt>> mat_mat_mult(vector<vector<Ctxt>> mat1, vector<vector<Ctxt>
                 }
                 else {
                     runsum.addCtxt(temp);
+                    ZZX dec;
+                    secretKey.Decrypt(dec,temp);
+                    cout << "dec1st: " << dec << endl;
                 }
             }
             // pushback for j
             temp_mat.push_back(runsum);
+            ZZX dec;
+            secretKey.Decrypt(dec,runsum);
+            cout << "dec: " << dec << endl;
         }
         // push for i
         mat.push_back(temp_mat);

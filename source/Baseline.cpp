@@ -25,7 +25,7 @@ int main() {
     cout << "-------------------- Initialization --------------------" << endl;
     auto begin_init = Clock::now();
 
-    long m = 190;                                         // Specific modulus
+    long m = 512;                                         // Specific modulus
     long p = 17;                                        // Plaintext base
     long r = 1;                                         // Lifting
     long L = 10;                                         // Number of levels in the modulus chain
@@ -148,22 +148,18 @@ int main() {
     vector<vector<ZZX>> inv_matrix = frac_to_ZZX(inv_int, inv_dec, phim);
     cout << "encode: " << inv_matrix << '\n' << endl;
 
-    // Encrypt.
-    //vector<vector<Ctxt>> inv_encrypt = Encrypt(m, p, r, L, c, w, y, y, inv_matrix);
-    //cout << "encrypt: " << inv_encrypt << endl;
-/*
-    // Encrypt and Decrypt.
-    vector<vector<int>> inv_enc_decrypt = Encrypt_Decrypt(m, p, r, L, c, w, y, y, inv_matrix, phim);
-    cout << "encrypt and decrypt: " << inv_enc_decrypt << endl;
+//    // Encrypt.
+//    vector<vector<Ctxt>> inv_encrypt = Encrypt(publicKey, inv_matrix);
+//    cout << "encrypt: " << inv_encrypt << endl;
+//
+//    // Decrypt.
+//    vector<vector<int>> inv_decrypt = Decrypt(secretKey, inv_encrypt, phim);
+//    cout << "decrypt: " << inv_decrypt << endl;
+//
+//    // Decode.
+//    vector<vector<double>> inv_decode = Decode(inv_decrypt, phim, p);
+//    cout << "decode: " << inv_decode << '\n' << endl;
 
-    // Decrypt.
-    //vector<vector<int>> inv_decrypt = Decrypt(m, p, r, L, c, w, y, y, inv_encrypt, phim);
-    //cout << "decrypt: " << inv_decrypt << endl;
-
-    // Decode.
-    vector<vector<double>> inv_decode = Decode(y, y, inv_enc_decrypt, phim);
-    cout << "decode: " << inv_decode << '\n' << endl;
-*/
     // FOR Xtrans.
 
     cout << "FOR X TRANSPOSE: " << endl;
@@ -181,10 +177,7 @@ int main() {
     vector<vector<ZZX>> x_matrix = frac_to_ZZX(x_int, x_dec, phim);
     cout << "encode: " << x_matrix << '\n' << endl;
 
-/*    // Encrypt and Decrypt.
-    vector<vector<int>> x_enc_decrypt = Encrypt_Decrypt(m, p, r, L, c, w, y, x, x_matrix, phim);
-    cout << "encrypt and decrypt: " << x_enc_decrypt << endl;
-
+/*
     // Decode.
     vector<vector<double>> x_decode = Decode(y, x, x_enc_decrypt, phim);
     cout << "decode: " << x_decode << '\n' << endl;
@@ -206,10 +199,7 @@ int main() {
     vector<vector<ZZX>> y_matrix = frac_to_ZZX(y_int, y_dec, phim);
     cout << "encode: " << y_matrix << '\n' << endl;
 
-    // Encrypt and Decrypt.
-/*    vector<vector<int>> y_enc_decrypt = Encrypt_Decrypt(m, p, r, L, c, w, x, 1, y_matrix, phim);
-    cout << "encrypt and decrypt: " << y_enc_decrypt << endl;
-
+/*
     // Decode.
     vector<vector<double>> y_decode = Decode(y_enc_decrypt, phim);
     cout << "decode: " << y_decode << '\n' << endl;
@@ -271,64 +261,35 @@ int main() {
 
     auto end_encrypt = Clock::now();
     cout << "Encryption Over!" << endl;
-    cout << "It took: " << duration_cast<seconds>(end_encrypt - begin_encrypt).count() << " seconds." << '\n' << endl;
+    cout << "It took: " << duration_cast<seconds>(end_encrypt - begin_encrypt).count() << " seconds." << endl;
 
-//    ZZX msg;
-//    SetCoeff(msg,1,1);
-//    cout << msg << endl;
-
-//    Ctxt enc(publicKey),enc2(publicKey);
-//    publicKey.Encrypt(enc, msg);
-//    publicKey.Encrypt(enc2, msg);
-    cout << "-------------------- Operation --------------------" << endl;
-//    vector<Ctxt> vec;
-//    vec.push_back(enc);
-//    vec.push_back(enc2);
-//    vec[0].multiplyBy(vec[1]);
+    cout << "-------------------- Operation --------------------" << '\n' << endl;
 
     // 1st multiplication.
-    vector<vector<Ctxt>> ctxt_mat_temp = mat_mat_mult(inv_enc, xtrans_enc, publicKey);
-
+//    vector<vector<Ctxt>> ctxt_mat_temp = mat_mat_mult(inv_enc, xtrans_enc, publicKey);
     //cout << ctxt_mat_temp << endl;
 
     // 2nd multiplication.
-    // ctxt for both places are the same?
-    vector<vector<Ctxt>> ctxt_mat = mat_mat_mult(ctxt_mat_temp, y_enc, publicKey);
+    vector<vector<Ctxt>> ctxt_mat = mat_mat_mult(xtrans_enc, y_enc, publicKey, secretKey);
 
     cout << "-------------------- Decryption --------------------" << endl;
+
     // Decrypt.
+    cout << ctxt_mat.size() << " " << ctxt_mat[0].size() << endl;
     vector<vector<int>> decrypt_mat = Decrypt(secretKey, ctxt_mat, phim);
     cout << decrypt_mat << endl;
 
     // Decode.
-
-//    ZZX ans;
-//    secretKey.Decrypt(ans, enc);
-//    cout << "Plaintext:  " << ans << endl;
-//    cout << "Plaintext:  " << endl;
-
     cout << Decode(decrypt_mat, phim, p) << endl;
 
-    vector<vector<int>> decrypt_invmat = Decrypt(secretKey, y_enc, phim);
-    cout << Decode(decrypt_invmat, phim, p) << endl;
-
-
-
-
-
-
-
-
+//    // test.
+//    vector<vector<int>> decrypt_mat1 = Decrypt(secretKey, y_enc, phim);
+//    cout << decrypt_mat1 << endl;
+//    cout << Decode(decrypt_mat1, phim, p) << endl;
 
     myfile.close();
 
     return 0;
-
-
-
-
-
-
 
 }
 
