@@ -266,11 +266,10 @@ int main() {
     cout << "-------------------- Operation --------------------" << '\n' << endl;
 
     // 1st multiplication.
-//    vector<vector<Ctxt>> ctxt_mat_temp = mat_mat_mult(inv_enc, xtrans_enc, publicKey);
-    //cout << ctxt_mat_temp << endl;
+    vector<vector<Ctxt>> ctxt_mat_temp = mat_mat_mult(inv_enc, xtrans_enc, publicKey, secretKey);
 
     // 2nd multiplication.
-    vector<vector<Ctxt>> ctxt_mat = mat_mat_mult(xtrans_enc, y_enc, publicKey, secretKey);
+    vector<vector<Ctxt>> ctxt_mat = mat_mat_mult(ctxt_mat_temp, y_enc, publicKey, secretKey);
 
     cout << "-------------------- Decryption --------------------" << endl;
 
@@ -281,11 +280,6 @@ int main() {
 
     // Decode.
     cout << Decode(decrypt_mat, phim, p) << endl;
-
-//    // test.
-//    vector<vector<int>> decrypt_mat1 = Decrypt(secretKey, y_enc, phim);
-//    cout << decrypt_mat1 << endl;
-//    cout << Decode(decrypt_mat1, phim, p) << endl;
 
     myfile.close();
 

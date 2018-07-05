@@ -16,8 +16,8 @@ vector<vector<double>> Int_Part(vector<vector<double>> mat);
 ZZX Encode(int x);
 ZZX frac_encoder(double z, int phim);
 vector<vector<ZZX>> frac_to_ZZX(vector<vector<double>> mat, vector<vector<double>> dec, int phim);
-vector<vector<Ctxt>> Encrypt(FHEPubKey publicKey, vector<vector<ZZX>> matrix);
 vector<vector<int>> Decrypt(FHESecKey& secretKey, vector<vector<Ctxt>> ctxt_mat, int phim);
 vector<vector<double>> Decode(vector<vector<int>> matrix, int phim, long p);
+//vector<vector<Ctxt>> Encrypt(FHEPubKey publicKey, vector<vector<ZZX>> matrix);
 
 #endif //HELIB_BASIC_ENCODING_H

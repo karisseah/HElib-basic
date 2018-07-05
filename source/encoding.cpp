@@ -62,7 +62,7 @@ ZZX Encode(int z) {
 
     ZZX ptxt;
 
-    int remainder, digits = 0, dividend = z;
+    int remainder, digits = 0, dividend = abs(z);
 
     // Stops when the dividend becomes 0.
     while (dividend != 0) {
@@ -73,7 +73,7 @@ ZZX Encode(int z) {
     int arr[digits];
 
     // Initialize dividend to be z again so that it doesnt use the updated dividend values.
-    dividend = z;
+    dividend = abs(z);
 
     // Array placement starts from 0. First placement is the constant's binary.
     for (int i = 0; i < digits; i++) {
@@ -85,7 +85,12 @@ ZZX Encode(int z) {
     // Prints out the array of binary numbers.
     for (int i = 0; i < digits; i++) {
         if (arr[i] == 1) {
-            SetCoeff(ptxt, i);
+            if (z >= 0) {
+                SetCoeff(ptxt, i);
+            }
+            else {
+                SetCoeff(ptxt, i, -1);
+            }
         }
     }
 
@@ -98,19 +103,25 @@ ZZX frac_encoder(double z, int phim) {
     ZZX ptxt;
     vector<double> temp;
     double frac_pt;
+    double temp_z = abs(z);
 
     while (frac_pt != 0) {
-        double store = z * 2;
+        double store = temp_z * 2;
         double int_pt = floor(store);
         temp.push_back(int_pt);
         frac_pt = store - int_pt;
-        z = frac_pt;
+        temp_z = frac_pt;
     }
 
     // Add n to each exponent and flip the sign of each terms.
     for (int i = 0; i < phim; i++) {
         if (temp[i] == 1) {
-            SetCoeff(ptxt, (-i-1) + phim, -1);
+            if (z >= 0) {
+                SetCoeff(ptxt, (-i - 1) + phim, -1);
+            }
+            else {
+                SetCoeff(ptxt, (-i - 1) + phim, 1);
+            }
             // If fractional part overflows into int part, equate to 0.
             for (int k = 0; k <= 1*phim/8; k++) {
                 ptxt[k] = 0;
