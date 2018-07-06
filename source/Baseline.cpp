@@ -104,6 +104,59 @@ int main() {
     cout << "Matrix X: " << mat1 << endl;
     cout << "Matrix Y: " << mat2 << endl;
 
+    // Normalize matrices X and Y.
+
+    // Normalize matrix X.
+    double x_min = mat1[0][0];
+    double x_max = mat1[0][0];
+
+    for (int i = 0; i < x; i++) {
+        for (int j = 0; j < y; j++) {
+            if (mat1[i][j] < x_min) {
+                x_min = mat1[i][j];
+            }
+            if (mat1[i][j] > x_max) {
+                x_max = mat1[i][j];
+            }
+        }
+    }
+
+    for (int i = 0; i < x; i++) {
+        for (int j = 0; j < y; j++) {
+            mat1[i][j] = (mat1[i][j] - x_min) / (x_max - x_min);
+        }
+    }
+
+    cout << "min value: " << x_min << " max value: " << x_max << endl;
+
+    cout << "After normalizing X: " << mat1 << endl;
+
+    // Normalize matrix Y.
+    double y_min = mat2[0][0];
+    double y_max = mat2[0][0];
+
+    for (int i = 0; i < x; i++) {
+        for (int j = 0; j < 1; j++) {
+            if (mat2[i][j] < y_min) {
+                y_min = mat2[i][j];
+            }
+            if (mat2[i][j] > y_max) {
+                y_max = mat2[i][j];
+            }
+        }
+    }
+
+    for (int i = 0; i < x; i++) {
+        for (int j = 0; j < 1; j++) {
+            mat2[i][j] = (mat2[i][j] - y_min) / (y_max - y_min);
+        }
+    }
+
+    cout << "min value: " << y_min << " max value: " << y_max << endl;
+
+    cout << "After normalizing Y: " << mat2 << endl;
+
+
     // Finding X transpose.
     vector<vector<double>> mat_trans;
     mat_trans = matrix_transpose(mat1);
@@ -274,7 +327,6 @@ int main() {
     cout << "-------------------- Decryption --------------------" << endl;
 
     // Decrypt.
-    cout << ctxt_mat.size() << " " << ctxt_mat[0].size() << endl;
     vector<vector<int>> decrypt_mat = Decrypt(secretKey, ctxt_mat, phim);
     cout << decrypt_mat << endl;
 
