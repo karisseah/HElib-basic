@@ -25,7 +25,7 @@ int main() {
     cout << "-------------------- Initialization --------------------" << endl;
     auto begin_init = Clock::now();
 
-    long m = 512;                                         // Specific modulus
+    long m = 256;                                         // Specific modulus
     long p = 17;                                        // Plaintext base
     long r = 1;                                         // Lifting
     long L = 10;                                         // Number of levels in the modulus chain
@@ -102,44 +102,67 @@ int main() {
     }
 
     cout << "Matrix X: " << mat1 << endl;
-    cout << "Matrix Y: " << mat2 << endl;
 
     // Normalize matrices X and Y.
 
     // Normalize matrix X.
-    double x_min = mat1[0][0];
-    double x_max = mat1[0][0];
+    double x_min;
+    double x_max;
+    vector<double> x_min_store;
+    vector<double> x_max_store;
 
-    for (int i = 0; i < x; i++) {
-        for (int j = 0; j < y; j++) {
+    // Exclude first column bcos all 1's.
+    for (int j = 1; j < y; j++) {
+        // Initialise the first element at the top of the column to be x_min and x_max first.
+        x_min = mat1[0][j];
+        x_max = mat1[0][j];
+        for (int i = 0; i < x; i++) {
+            // If any other elements below in the same column is smaller than x_min, set that element to be x_min.
             if (mat1[i][j] < x_min) {
                 x_min = mat1[i][j];
             }
+            // If any other elements below in the same column is larger than x_max, set that element to be x_max.
             if (mat1[i][j] > x_max) {
                 x_max = mat1[i][j];
             }
         }
+        x_min_store.push_back(x_min);
+        x_max_store.push_back(x_max);
     }
 
     for (int i = 0; i < x; i++) {
         for (int j = 0; j < y; j++) {
-            mat1[i][j] = (mat1[i][j] - x_min) / (x_max - x_min);
+            // For the first column (all 1's).
+            if (j == 0) {
+                mat1[i][j] = mat1[i][j];
+            }
+            // For second column onwards.
+            else {
+                mat1[i][j] = (mat1[i][j] - x_min_store[j-1]) / (x_max_store[j-1] - x_min_store[j-1]);
+            }
         }
     }
 
-    cout << "min value: " << x_min << " max value: " << x_max << endl;
+    cout << "min value: " << x_min_store << ", max value: " << x_max_store << endl;
 
     cout << "After normalizing X: " << mat1 << endl;
 
-    // Normalize matrix Y.
-    double y_min = mat2[0][0];
-    double y_max = mat2[0][0];
+    cout << "Matrix Y: " << mat2 << endl;
 
-    for (int i = 0; i < x; i++) {
-        for (int j = 0; j < 1; j++) {
+    // Normalize matrix Y.
+    double y_min;
+    double y_max;
+
+    for (int j = 0; j < 1; j++) {
+        // Initialise the first element at the top of the column to be x_min and x_max first.
+        y_min = mat2[0][0];
+        y_max = mat2[0][0];
+        for (int i = 0; i < x; i++) {
+            // If any other elements below in the same column is smaller than x_min, set that element to be x_min.
             if (mat2[i][j] < y_min) {
                 y_min = mat2[i][j];
             }
+            // If any other elements below in the same column is larger than x_max, set that element to be x_max.
             if (mat2[i][j] > y_max) {
                 y_max = mat2[i][j];
             }
@@ -152,10 +175,9 @@ int main() {
         }
     }
 
-    cout << "min value: " << y_min << " max value: " << y_max << endl;
+    cout << "min value: " << y_min << ", max value: " << y_max << endl;
 
     cout << "After normalizing Y: " << mat2 << endl;
-
 
     // Finding X transpose.
     vector<vector<double>> mat_trans;
@@ -172,13 +194,12 @@ int main() {
 
     // XtransX_Inv * Xtrans.
     vector<vector<double>> XtransXInv_Xtrans = dotprod(XtransX_Inv, mat_trans);
+    // TEST
+    cout << '\n' << "This is the first product matrix: " << XtransXInv_Xtrans << '\n' << endl;
 
     // XtransX_Inv * Xtrans * Y.
     vector<vector<double>> matrix = dotprod(XtransXInv_Xtrans, mat2);
     cout << "This is the product matrix: " << matrix << '\n' << endl;
-
-//    cout << "-------------------- Encryption --------------------" << endl;
-//    auto begin_encrypt = Clock::now();
 
     // To get phim.
     int phim = to_int(context.zMStar.getPhiM());
@@ -201,18 +222,6 @@ int main() {
     vector<vector<ZZX>> inv_matrix = frac_to_ZZX(inv_int, inv_dec, phim);
     cout << "encode: " << inv_matrix << '\n' << endl;
 
-//    // Encrypt.
-//    vector<vector<Ctxt>> inv_encrypt = Encrypt(publicKey, inv_matrix);
-//    cout << "encrypt: " << inv_encrypt << endl;
-//
-//    // Decrypt.
-//    vector<vector<int>> inv_decrypt = Decrypt(secretKey, inv_encrypt, phim);
-//    cout << "decrypt: " << inv_decrypt << endl;
-//
-//    // Decode.
-//    vector<vector<double>> inv_decode = Decode(inv_decrypt, phim, p);
-//    cout << "decode: " << inv_decode << '\n' << endl;
-
     // FOR Xtrans.
 
     cout << "FOR X TRANSPOSE: " << endl;
@@ -230,11 +239,6 @@ int main() {
     vector<vector<ZZX>> x_matrix = frac_to_ZZX(x_int, x_dec, phim);
     cout << "encode: " << x_matrix << '\n' << endl;
 
-/*
-    // Decode.
-    vector<vector<double>> x_decode = Decode(y, x, x_enc_decrypt, phim);
-    cout << "decode: " << x_decode << '\n' << endl;
-*/
     // FOR Y.
 
     cout << "FOR Y: " << endl;
@@ -252,32 +256,8 @@ int main() {
     vector<vector<ZZX>> y_matrix = frac_to_ZZX(y_int, y_dec, phim);
     cout << "encode: " << y_matrix << '\n' << endl;
 
-/*
-    // Decode.
-    vector<vector<double>> y_decode = Decode(y_enc_decrypt, phim);
-    cout << "decode: " << y_decode << '\n' << endl;
-*/
-//    // Multiplication of enc(XtransX_Inv), enc(Xtrans) and enc(Y).
-//    vector<vector<Ctxt>> inv_enc = Encrypt(publicKey, inv_matrix);
-////    cout << inv_enc << '\n' << endl;
-//    vector<vector<Ctxt>> xtrans_enc = Encrypt(publicKey, x_matrix);
-////    cout << x_enc << '\n' << endl;
-//    vector<vector<Ctxt>> y_enc = Encrypt(publicKey, y_matrix);
-////    cout << y_enc << '\n' << endl;
-
-
-//    cout << inv_enc.size() << endl;
-//    cout << inv_enc[0].size() << endl;
-////
-//    cout << xtrans_enc.size() << endl;
-//    cout << xtrans_enc[0].size() << endl;
-//
-//    cout << y_enc.size() << endl;
-//    cout << y_enc[0].size() << endl;
-
     cout << "-------------------- Encryption --------------------" << endl;
     auto begin_encrypt = Clock::now();
-
 
     vector<vector<Ctxt>> inv_enc;
     for (int i = 0; i < inv_matrix.size(); i++) {
@@ -316,7 +296,7 @@ int main() {
     cout << "Encryption Over!" << endl;
     cout << "It took: " << duration_cast<seconds>(end_encrypt - begin_encrypt).count() << " seconds." << endl;
 
-    cout << "-------------------- Operation --------------------" << '\n' << endl;
+    cout << "-------------------- Operation ---------------------" << '\n' << endl;
 
     // 1st multiplication.
     vector<vector<Ctxt>> ctxt_mat_temp = mat_mat_mult(inv_enc, xtrans_enc, publicKey, secretKey);
@@ -326,6 +306,7 @@ int main() {
 
     cout << "-------------------- Decryption --------------------" << endl;
 
+    // After both mult.
     // Decrypt.
     vector<vector<int>> decrypt_mat = Decrypt(secretKey, ctxt_mat, phim);
     cout << decrypt_mat << endl;
@@ -333,62 +314,14 @@ int main() {
     // Decode.
     cout << Decode(decrypt_mat, phim, p) << endl;
 
-    myfile.close();
+//    // After first mult only.
+//    // Decrypt.
+//    vector<vector<int>> decrypt_mat = Decrypt(secretKey, ctxt_mat_temp, phim);
+//    cout << decrypt_mat << endl;
+//
+//    // Decode.
+//    cout << Decode(decrypt_mat, phim, p) << endl;
 
     return 0;
 
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    //SetCoeff(msg,1,1);
-    //SetCoeff(msg,2,1); // 4 = x^2
-
-    //cout << msg << endl;
-
-/*
-    Ctxt enc(publicKey), enc2(publicKey);
-    publicKey.Encrypt(enc, msg);
-    //publicKey.Encrypt(enc2, msg2);
-
-    auto end_encrypt = Clock::now();
-    cout << "Encryption Over!" << endl;
-    cout << "It took: " << duration_cast<seconds>(end_encrypt - begin_encrypt).count() << " seconds." << endl;
-
-
-    cout << "-------------------- Operation --------------------" << endl;
-    cout << "Ciphertext before operations:" << endl;
-    cout << enc << endl;
-
-    cout << "Ciphertext after addition:" << endl;
-    enc.addCtxt(enc); // expect to get 4
-    cout << enc << endl;
-
-//    cout << "Ciphertext after multiplication:" << endl;
-//    enc.multiplyBy(enc); // expect to get 16
-//    cout << enc << endl;
-
-    cout << "-------------------- Decryption --------------------" << endl;
-    ZZX ans;
-    secretKey.Decrypt(ans, enc);
-    cout << "Plaintext:  " << ans << endl;
-*/
-

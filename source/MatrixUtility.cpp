@@ -3,6 +3,11 @@
 //
 
 #include "MatrixUtility.h"
+#include <iostream>
+#include <FHE.h>
+
+using namespace std;
+using namespace NTL;
 
 vector<vector<double>> matrix_transpose(vector<vector<double>> mat1) {
 
@@ -19,7 +24,6 @@ vector<vector<double>> matrix_transpose(vector<vector<double>> mat1) {
 vector<vector<double>> dotprod(vector<vector<double>> mat1, vector<vector<double>> mat2) {
 
     int mat1row = mat1.size();
-    int mat1col = mat1[0].size();
 
     int mat2row = mat2.size();
     int mat2col = mat2[0].size();

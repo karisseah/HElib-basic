@@ -5,16 +5,9 @@
 #include "encoding.h"
 #include <iostream>
 #include <FHE.h>
-#include <math.h>
-
-#include<sstream>
-#include<string>
 
 using namespace std;
 using namespace NTL;
-using namespace chrono;
-
-typedef high_resolution_clock Clock;
 
 vector<vector<double>> Frac_Part(vector<vector<double>> mat) {
 
@@ -123,7 +116,7 @@ ZZX frac_encoder(double z, int phim) {
                 SetCoeff(ptxt, (-i - 1) + phim, 1);
             }
             // If fractional part overflows into int part, equate to 0.
-            for (int k = 0; k <= 1*phim/8; k++) {
+            for (int k = 0; k <= 1*phim/7; k++) {
                 ptxt[k] = 0;
             }
         }
@@ -146,7 +139,7 @@ vector<vector<ZZX>> frac_to_ZZX(vector<vector<double>> mat, vector<vector<double
 
     //cout << "fraction to ZZX: " << endl;
     for (int i = 0; i < matrow; i++) {
-        vector<ZZX> tempp;
+        vector<ZZX> temp;
         for (int j = 0; j < matcol; j++) {
             double z1 = mat[i][j];
             // Int part --> ZZX.
@@ -156,72 +149,71 @@ vector<vector<ZZX>> frac_to_ZZX(vector<vector<double>> mat, vector<vector<double
             msg2 = frac_encoder(z2, phim);
             // Adding the int and fractional parts tgt.
             int_and_frac = msg1 + msg2;
-            tempp.push_back(int_and_frac);
+            temp.push_back(int_and_frac);
         }
-        polyn.push_back(tempp);
+        polyn.push_back(temp);
     }
 
     return polyn;
 
 }
 
-//vector<vector<Ctxt>> Encrypt(long m, long p, long r, long L, long c, long w, int rows, int cols, vector<vector<ZZX>> matrix) {
-vector<vector<Ctxt>> Encrypt(FHEPubKey publicKey, vector<vector<ZZX>> matrix) {
-
-    cout << "-------------------- Encryption --------------------" << endl;
-    auto begin_encrypt = Clock::now();
-
-//    FHEcontext context(m, p, r);
-//    buildModChain(context, L, c);
-//    FHESecKey secretKey(context);
-//    FHEPubKey &publicKey = secretKey;
-//    secretKey.GenSecKey(w);
-
-    // Encrypt for all ZZX in mat
-
-
-    int matrow = matrix.size();
-    int matcol = matrix[0].size();
-
-
-    vector<vector<Ctxt>> ctxt_mat;
-    for (int i = 0; i < matrow; i++) {
-        vector<Ctxt> temp_ctxt;
-        for (int j = 0; j < matcol; j++) {
-            Ctxt enc(publicKey);
-            publicKey.Encrypt(enc, matrix[i][j]);
-            temp_ctxt.push_back(enc);
-        }
-        ctxt_mat.push_back(temp_ctxt);
-    }
-
-    auto end_encrypt = Clock::now();
-    cout << "Encryption Over!" << endl;
-    cout << "It took: " << duration_cast<seconds>(end_encrypt - begin_encrypt).count() << " seconds." << '\n' << endl;
-
-    cout << "-------------------- Operation --------------------" << endl;
-    cout << "Ciphertext before operations:" << endl;
-//    cout << ctxt_mat << endl;
-
-//    cout << "Ciphertext after addition:" << endl;
-//    for (int i = 0; i < x; i++) {
-//        for (int j = 0; j < v; j++) {
-//            ctxt_mat[i][j].addCtxt(ctxt_mat[i][j]);
+//vector<vector<Ctxt>> Encrypt(FHEPubKey publicKey, vector<vector<ZZX>> matrix) {
+//
+//    cout << "-------------------- Encryption --------------------" << endl;
+//    auto begin_encrypt = Clock::now();
+//
+////    FHEcontext context(m, p, r);
+////    buildModChain(context, L, c);
+////    FHESecKey secretKey(context);
+////    FHEPubKey &publicKey = secretKey;
+////    secretKey.GenSecKey(w);
+//
+//    // Encrypt for all ZZX in mat
+//
+//
+//    int matrow = matrix.size();
+//    int matcol = matrix[0].size();
+//
+//
+//    vector<vector<Ctxt>> ctxt_mat;
+//    for (int i = 0; i < matrow; i++) {
+//        vector<Ctxt> temp_ctxt;
+//        for (int j = 0; j < matcol; j++) {
+//            Ctxt enc(publicKey);
+//            publicKey.Encrypt(enc, matrix[i][j]);
+//            temp_ctxt.push_back(enc);
 //        }
+//        ctxt_mat.push_back(temp_ctxt);
 //    }
-//    cout << ctxt_mat << endl;
-
-//    cout << "Ciphertext after multiplication:" << endl;
-//    for (int i = 0; i < x; i++) {
-//        for (int j = 0; j < v; j++) {
-//            ctxt_mat[i][j].multiplyBy(ctxt_mat[i][j]);
-//        }
-//    }
-//    cout << ctxt_mat << endl;
-
-    return ctxt_mat;
-
-}
+//
+//    auto end_encrypt = Clock::now();
+//    cout << "Encryption Over!" << endl;
+//    cout << "It took: " << duration_cast<seconds>(end_encrypt - begin_encrypt).count() << " seconds." << '\n' << endl;
+//
+//    cout << "-------------------- Operation --------------------" << endl;
+//    cout << "Ciphertext before operations:" << endl;
+////    cout << ctxt_mat << endl;
+//
+////    cout << "Ciphertext after addition:" << endl;
+////    for (int i = 0; i < x; i++) {
+////        for (int j = 0; j < v; j++) {
+////            ctxt_mat[i][j].addCtxt(ctxt_mat[i][j]);
+////        }
+////    }
+////    cout << ctxt_mat << endl;
+//
+////    cout << "Ciphertext after multiplication:" << endl;
+////    for (int i = 0; i < x; i++) {
+////        for (int j = 0; j < v; j++) {
+////            ctxt_mat[i][j].multiplyBy(ctxt_mat[i][j]);
+////        }
+////    }
+////    cout << ctxt_mat << endl;
+//
+//    return ctxt_mat;
+//
+//}
 
 vector<vector<int>> Decrypt(FHESecKey& secretKey, vector<vector<Ctxt>> ctxt_mat, int phim) {
 
@@ -250,129 +242,6 @@ vector<vector<int>> Decrypt(FHESecKey& secretKey, vector<vector<Ctxt>> ctxt_mat,
 
 }
 
-//vector<vector<double>> Decode(vector<vector<int>> matrix, int phim, long p) {
-//
-//    int matrow = matrix.size();
-//    int matcol = matrix[0].size();
-//
-//    vector<vector<vector<int>>> storage(matrow, vector<vector<int>>(matcol, vector<int>(phim)));
-//
-////    storage.resize(matrow);
-////    for (int i = 0; i < storage.size(); i++) {
-////        storage[i].resize(matcol);
-////    }
-//
-//    cout << storage << endl;
-//
-//    int index = 0;
-//    for (int i = 0; i < matrow; i++) {
-//        for (int j = 0; j < matcol; j++) {
-//            storage[i][j] = matrix[index++];
-//        }
-//        // cant exit this above loop
-//    }
-//
-//    vector<double> result_vec;
-//    vector<vector<double>> result_vvec;
-//
-//    // Initialize sum of fractional part and sum of int part to be 0.
-//    double result1 = 0;
-//    double result2 = 0;
-//    for (int i = 0; i < matrow; i++) {
-//        for (int j = 0; j < matcol; j++) {
-//            for (int k = 0; k < phim; k++) {
-//                // Fractional part.
-//                if (k > phim / 2) {
-//                    if (storage[i][j][k] > floor(p/2)) {
-//                        storage[i][j][k] = storage[i][j][k] - p;
-//                    }
-//                    // -x^(n-i) --> x^i
-//                    result1 += (-1*storage[i][j][k]) * pow(2, k - phim);
-//                }
-//                // Integer part.
-//                else {
-//                    result2 += storage[i][j][k] * pow(2, k);
-//                }
-//            }
-//            double final = result1 + result2;
-//            result_vec.push_back(final);
-//            // Reset the sum to be 0 for the next iteration.
-//            result1 = 0;
-//            result2 = 0;
-//        }
-//    }
-//
-//    result_vvec.resize(matrow);
-//    for (int i = 0; i < result_vvec.size(); i++) {
-//        result_vvec[i].resize(matcol);
-//    }
-//
-//    int index1 = 0;
-//    for (int i = 0; i < matrow; i++) {
-//        for (int j = 0; j < matcol; j++) {
-//            result_vvec[i][j] = result_vec[index1++];
-//        }
-//    }
-//
-////    cout << "-------------------- Decryption --------------------" << endl;
-//    cout << "Plaintext:  ";
-//
-//    return result_vvec;
-//
-//}
-
-//vector<vector<double>> Decode(vector<vector<int>> matrix, int phim, long p) {
-//
-//    int matrow = matrix.size();
-//    int matcol = matrix[0].size();
-//
-//    vector<double> result_vec;
-//    vector<vector<double>> result_vvec;
-//
-//    // Initialize sum of fractional part and sum of int part to be 0.
-//    double result1 = 0, result2 = 0, final = 0;
-//    for (int i = 0; i < matrow; i++) {
-//        for (int j = 0; j < matcol; j++) {
-//            // Fractional part.
-//            if (j > phim / 2) {
-//                if (matrix[i][j] > floor(p/2)) {
-//                    matrix[i][j] = matrix[i][j] - p;
-//                }
-//                // -x^(n-i) --> x^i
-//                result1 += (-1*matrix[i][j]) * pow(2, j - phim);
-//            }
-//            // Integer part.
-//            else {
-//                result2 += matrix[i][j] * pow(2, j);
-//            }
-//            final = result1 + result2;
-//        }
-//        result_vec.push_back(final);
-//        result1 = 0;
-//        result2 = 0;
-//    }
-//    result_vvec.push_back(result_vec);
-//
-////    result_vvec.resize(matrow);
-////    for (int i = 0; i < result_vvec.size(); i++) {
-////        result_vvec[i].resize(matcol);
-////    }
-////
-////    int index1 = 0;
-////    for (int i = 0; i < matrow; i++) {
-////        for (int j = 0; j < matcol; j++) {
-////            result_vvec[i][j] = result_vec[index1++];
-////        }
-////    }
-//
-////    cout << "-------------------- Decryption --------------------" << endl;
-//    cout << "Plaintext:  ";
-//
-//    return result_vvec;
-//
-//}
-
-
 vector<vector<double>> Decode(vector<vector<int>> matrix, int phim, long p) {
 
     int matrow = matrix.size();
@@ -391,7 +260,7 @@ vector<vector<double>> Decode(vector<vector<int>> matrix, int phim, long p) {
                 matrix[i][j] = matrix[i][j] - p;
             }
             // Fraction part.
-            if (j > 1*phim/8) {
+            if (j > 1*phim/7) {
                 result1 += (-matrix[i][j]) * pow(2, j-phim);
             }
             // Integer part.
@@ -400,81 +269,15 @@ vector<vector<double>> Decode(vector<vector<int>> matrix, int phim, long p) {
             }
         }
         result = result1 + result2;
-        result = fmod(result, 17);
+        result = fmod(result, p);
         result_vec.push_back(result);
         result1 = 0;
         result2 = 0;
     }
     result_vvec.push_back(result_vec);
 
-    cout << "Plaintext:  ";
+    cout << "Plaintext: ";
 
     return result_vvec;
 
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/*
-// Integers to ZZX in matrix.
-vector<vector<ZZX>> int_to_ZZX(int x, int v, vector<vector<double>> product) {
-
-    ZZX msg1;
-
-    vector<vector<ZZX>> mat_int;
-
-    // int --> ZZX for each elements in product matrix.
-    cout << "int to ZZX: " << endl;
-    for (int i = 0; i < x; i++) {
-        vector<ZZX> temp;
-        for (int j = 0; j < v; j++) {
-            int z = product[i][j];
-            msg1 = encode(z);
-            temp.push_back(msg1);
-        }
-        mat_int.push_back(temp);
-    }
-
-    return mat_int;
-
-}
-
-// Fractions to binary in matrix.
-vector<vector<ZZX>> frac_to_binary(int rows, int cols, vector<vector<double>> dec, int phim) {
-
-
-    ZZX msg2;
-
-    vector<vector<ZZX>> binary;
-
-    // frac --> ZZX for each elements in product matrix.
-    cout << "frac to binary: " << endl;
-    for (int i = 0; i < rows; i++) {
-        vector<ZZX> temp;
-        for (int j = 0; j < cols; j++) {
-            long double z = dec[i][j];
-            msg2 = frac_encoder(z, cols, phim);
-            temp.push_back(msg2);
-        }
-        binary.push_back(temp);
-    }
-
-    return binary;
-
-}*/
-
