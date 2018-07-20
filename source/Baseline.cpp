@@ -25,10 +25,10 @@ int main() {
     cout << "-------------------- Initialization --------------------" << endl;
     auto begin_init = Clock::now();
 
-    long m = 256;                                         // Specific modulus
+    long m = 256;                                       // Specific modulus
     long p = 17;                                        // Plaintext base
     long r = 1;                                         // Lifting
-    long L = 10;                                         // Number of levels in the modulus chain
+    long L = 10;                                        // Number of levels in the modulus chain
     long c = 2;                                         // Number of columns in key-switching matrix
     long w = 2;                                         // Hamming weight of secret key
     long d = 1;                                         // Degree of the field extension

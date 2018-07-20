@@ -140,7 +140,7 @@ vector<vector<Ctxt>> mat_mat_mult(vector<vector<Ctxt>> mat1, vector<vector<Ctxt>
             ZZX dec;
             secretKey.Decrypt(dec,runsum);
         }
-        // push for i
+        // pushback for i
         mat.push_back(temp_mat);
     }
 

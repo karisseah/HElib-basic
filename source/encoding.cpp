@@ -158,63 +158,6 @@ vector<vector<ZZX>> frac_to_ZZX(vector<vector<double>> mat, vector<vector<double
 
 }
 
-//vector<vector<Ctxt>> Encrypt(FHEPubKey publicKey, vector<vector<ZZX>> matrix) {
-//
-//    cout << "-------------------- Encryption --------------------" << endl;
-//    auto begin_encrypt = Clock::now();
-//
-////    FHEcontext context(m, p, r);
-////    buildModChain(context, L, c);
-////    FHESecKey secretKey(context);
-////    FHEPubKey &publicKey = secretKey;
-////    secretKey.GenSecKey(w);
-//
-//    // Encrypt for all ZZX in mat
-//
-//
-//    int matrow = matrix.size();
-//    int matcol = matrix[0].size();
-//
-//
-//    vector<vector<Ctxt>> ctxt_mat;
-//    for (int i = 0; i < matrow; i++) {
-//        vector<Ctxt> temp_ctxt;
-//        for (int j = 0; j < matcol; j++) {
-//            Ctxt enc(publicKey);
-//            publicKey.Encrypt(enc, matrix[i][j]);
-//            temp_ctxt.push_back(enc);
-//        }
-//        ctxt_mat.push_back(temp_ctxt);
-//    }
-//
-//    auto end_encrypt = Clock::now();
-//    cout << "Encryption Over!" << endl;
-//    cout << "It took: " << duration_cast<seconds>(end_encrypt - begin_encrypt).count() << " seconds." << '\n' << endl;
-//
-//    cout << "-------------------- Operation --------------------" << endl;
-//    cout << "Ciphertext before operations:" << endl;
-////    cout << ctxt_mat << endl;
-//
-////    cout << "Ciphertext after addition:" << endl;
-////    for (int i = 0; i < x; i++) {
-////        for (int j = 0; j < v; j++) {
-////            ctxt_mat[i][j].addCtxt(ctxt_mat[i][j]);
-////        }
-////    }
-////    cout << ctxt_mat << endl;
-//
-////    cout << "Ciphertext after multiplication:" << endl;
-////    for (int i = 0; i < x; i++) {
-////        for (int j = 0; j < v; j++) {
-////            ctxt_mat[i][j].multiplyBy(ctxt_mat[i][j]);
-////        }
-////    }
-////    cout << ctxt_mat << endl;
-//
-//    return ctxt_mat;
-//
-//}
-
 vector<vector<int>> Decrypt(FHESecKey& secretKey, vector<vector<Ctxt>> ctxt_mat, int phim) {
 
     ZZX temp_store_zzx;
